@@ -1,0 +1,48 @@
+name: Auto Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy SIKAS-RT to VPS
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            echo "==> [SIKAS-RT] Memulai Auto-Deployment..."
+            cd /var/www/sikasrt
+
+            echo "==> [1/6] Menarik update kode terbaru dari GitHub..."
+            git pull origin main
+
+            echo "==> [2/6] Memperbarui dependensi composer jika ada perubahan..."
+            composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction
+
+            echo "==> [3/6] Menjalankan migrasi database..."
+            php artisan migrate --force
+
+            echo "==> [4/6] Membersihkan dan mengoptimasi cache Laravel..."
+            php artisan optimize:clear
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            echo "==> [5/6] Memperbarui hak akses folder storage dan database..."
+            chown -R www-data:www-data /var/www/sikasrt/storage /var/www/sikasrt/bootstrap/cache /var/www/sikasrt/database
+            chmod -R 775 /var/www/sikasrt/storage /var/www/sikasrt/bootstrap/cache
+
+            echo "==> [6/6] Reload Nginx & PHP-FPM..."
+            systemctl reload nginx
+            systemctl reload php8.2-fpm
+
+            echo "==> [SUCCESS] Deployment ke https://sikas.mehape.com berhasil diselesaikan!"
