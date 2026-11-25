@@ -81,6 +81,45 @@
     </a>
 </div>
 
+<!-- Shortcut Layanan Warga: Surat, UMKM, Bank Sampah -->
+<div class="grid grid-3" style="margin-bottom: 24px; gap: 14px;">
+    <a href="{{ route('surat.index') }}" style="text-decoration: none;">
+        <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 16px; border: 1px solid rgba(167, 139, 250, 0.3); transition: transform 0.2s;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(167, 139, 250, 0.2); color: #a78bfa; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                <i class="fa-solid fa-envelope-open-text"></i>
+            </div>
+            <div>
+                <h4 style="font-size: 14px; font-weight: 700; color: #fff;">Surat Pengantar RT</h4>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Ajukan surat online & cetak resmi</p>
+            </div>
+        </div>
+    </a>
+
+    <a href="{{ route('umkm.index') }}" style="text-decoration: none;">
+        <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 16px; border: 1px solid rgba(251, 191, 36, 0.3); transition: transform 0.2s;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(251, 191, 36, 0.2); color: #fbbf24; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                <i class="fa-solid fa-store"></i>
+            </div>
+            <div>
+                <h4 style="font-size: 14px; font-weight: 700; color: #fff;">Etalase UMKM Warga</h4>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Promosikan usaha & belanja tetangga</p>
+            </div>
+        </div>
+    </a>
+
+    <a href="{{ route('bank_sampah.index') }}" style="text-decoration: none;">
+        <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 16px; border: 1px solid rgba(45, 212, 191, 0.3); transition: transform 0.2s;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(45, 212, 191, 0.2); color: #2dd4bf; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                <i class="fa-solid fa-recycle"></i>
+            </div>
+            <div>
+                <h4 style="font-size: 14px; font-weight: 700; color: #fff;">Bank Sampah RT</h4>
+                <p style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">Tabungan daur ulang & cek saldo</p>
+            </div>
+        </div>
+    </a>
+</div>
+
 <div class="grid grid-3" style="margin-bottom: 30px;">
     <div class="card metric-card">
         <div class="metric-icon" style="background: var(--gradient-accent);">

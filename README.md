@@ -25,6 +25,9 @@ Aplikasi Web Modern untuk Tata Kelola Keuangan Kas RT dan Keamanan Lingkungan Ce
 - **Jadwal Ronda Siskamling (`/ronda`)**: Pengelompokan regu ronda harian (Senin - Minggu), penugasan warga, dan fitur check-in mandiri kehadiran ronda malam.
 - **Layanan Posyandu (`/posyandu`)**: Agenda kegiatan berkala serta pencatatan rekam medis pemeriksaan balita (BB, TB, gizi, imunisasi) dan lansia (tensi, gula darah).
 - **Tagihan Warga (`/tagihan`)**: Penerbitan invoice bulanan secara massal/individual, monitoring status bayar, serta cetak bukti kuitansi resmi.
+- **Layanan Surat Menyurat (`/surat`)**: Pengajuan surat pengantar RT mandiri (KTP/KK, Domisili, SKU, SKCK), verifikasi persetujuan Ketua RT, auto format nomor surat, dan cetak dokumen resmi ber-kop surat.
+- **Etalase UMKM Warga (`/umkm`)**: Pemberdayaan ekonomi tetangga dengan katalog usaha dan produk rumahan warga, filter kategori, serta direct link chat pemesanan via WhatsApp.
+- **Bank Sampah Berkah RT (`/bank-sampah`)**: Program ekonomi sirkular ramah lingkungan untuk menimbang setoran sampah anorganik (botol plastik, kardus, kertas, logam, jelantah), konversi otomatis menjadi saldo tabungan rupiah, dan fasilitas tarik tunai.
 
 ---
 

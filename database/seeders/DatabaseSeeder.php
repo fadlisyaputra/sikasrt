@@ -379,5 +379,10 @@ class DatabaseSeeder extends Seeder
             'resolved_at' => Carbon::now()->subDays(1),
             'resolution_notes' => 'Pengujian respons sirene berjalan normal dalam 3 detik.',
         ]);
+
+        $this->call([
+            RondaPosyanduTagihanSeeder::class,
+            SuratUmkmBankSampahSeeder::class,
+        ]);
     }
 }

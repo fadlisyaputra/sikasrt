@@ -107,4 +107,26 @@ class User extends Authenticatable
     {
         return $this->hasMany(WargaBill::class);
     }
+
+    public function suratRequests()
+    {
+        return $this->hasMany(SuratRequest::class);
+    }
+
+    public function umkmProducts()
+    {
+        return $this->hasMany(UmkmProduct::class);
+    }
+
+    public function bankSampahTransactions()
+    {
+        return $this->hasMany(BankSampahTransaction::class);
+    }
+
+    public function getBankSampahBalanceAttribute()
+    {
+        $setor = $this->bankSampahTransactions()->where('tipe', 'setor')->where('status', 'completed')->sum('total_rp');
+        $tarik = $this->bankSampahTransactions()->where('tipe', 'tarik')->where('status', 'completed')->sum('total_rp');
+        return max(0, (float)$setor - (float)$tarik);
+    }
 }

@@ -599,6 +599,17 @@
                 <i class="fa-solid fa-bullhorn"></i> <span>Pengumuman</span>
             </a>
 
+            <div class="nav-label" style="margin-top: 12px;">Layanan & Ekonomi</div>
+            <a href="{{ route('surat.index') }}" class="nav-item {{ request()->routeIs('surat.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-envelope-open-text" style="color: #a78bfa;"></i> <span>Surat Pengantar</span>
+            </a>
+            <a href="{{ route('umkm.index') }}" class="nav-item {{ request()->routeIs('umkm.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-store" style="color: #fbbf24;"></i> <span>UMKM Warga</span>
+            </a>
+            <a href="{{ route('bank_sampah.index') }}" class="nav-item {{ request()->routeIs('bank_sampah.*') ? 'active' : '' }}">
+                <i class="fa-solid fa-recycle" style="color: #2dd4bf;"></i> <span>Bank Sampah</span>
+            </a>
+
             <div class="nav-label" style="margin-top: 12px;">Akses & Portal IoT</div>
             <a href="{{ route('ktp.index') }}" class="nav-item {{ request()->routeIs('ktp.*') ? 'active' : '' }}" style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25);">
                 <i class="fa-solid fa-id-card" style="color: #818cf8;"></i> <span>e-KTP & Akses Portal</span>

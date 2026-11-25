@@ -12,6 +12,9 @@ use App\Http\Controllers\KtpController;
 use App\Http\Controllers\RondaController;
 use App\Http\Controllers\PosyanduController;
 use App\Http\Controllers\TagihanController;
+use App\Http\Controllers\SuratController;
+use App\Http\Controllers\UmkmController;
+use App\Http\Controllers\BankSampahController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -101,6 +104,28 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/tagihan/tambah', [TagihanController::class, 'store'])->name('tagihan.store');
         Route::post('/tagihan/lunas/{id}', [TagihanController::class, 'markPaid'])->name('tagihan.mark_paid');
         Route::delete('/tagihan/{id}', [TagihanController::class, 'destroy'])->name('tagihan.destroy');
+    });
+
+    // 4. Layanan Surat Menyurat Routes
+    Route::get('/surat', [SuratController::class, 'index'])->name('surat.index');
+    Route::post('/surat/ajukan', [SuratController::class, 'store'])->name('surat.store');
+    Route::get('/surat/cetak/{id}', [SuratController::class, 'print'])->name('surat.print');
+    Route::middleware(['role:superadmin,rt'])->group(function () {
+        Route::post('/surat/setujui/{id}', [SuratController::class, 'approve'])->name('surat.approve');
+        Route::post('/surat/tolak/{id}', [SuratController::class, 'reject'])->name('surat.reject');
+    });
+
+    // 5. Etalase UMKM Warga Routes
+    Route::get('/umkm', [UmkmController::class, 'index'])->name('umkm.index');
+    Route::post('/umkm/tambah', [UmkmController::class, 'store'])->name('umkm.store');
+    Route::put('/umkm/update/{id}', [UmkmController::class, 'update'])->name('umkm.update');
+    Route::delete('/umkm/hapus/{id}', [UmkmController::class, 'destroy'])->name('umkm.destroy');
+
+    // 6. Bank Sampah RT Routes
+    Route::get('/bank-sampah', [BankSampahController::class, 'index'])->name('bank_sampah.index');
+    Route::middleware(['role:superadmin,bendahara,rt'])->group(function () {
+        Route::post('/bank-sampah/transaksi', [BankSampahController::class, 'storeTransaction'])->name('bank_sampah.transaction.store');
+        Route::post('/bank-sampah/kategori', [BankSampahController::class, 'storeCategory'])->name('bank_sampah.category.store');
     });
 
     // IoT & ESP32 Smart RT Management Routes
