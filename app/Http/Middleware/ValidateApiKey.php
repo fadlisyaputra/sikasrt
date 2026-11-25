@@ -16,7 +16,7 @@ class ValidateApiKey
     public function handle(Request $request, Closure $next): Response
     {
         $apiKey = $request->header('X-API-KEY') ?? $request->header('X-ESP32-KEY') ?? $request->input('api_key');
-        $masterKey = env('ESP32_API_KEY', 'sikasrt-esp32-secret-key-2026');
+        $masterKey = config('services.esp32.api_key', 'sikasrt-esp32-secret-key-2026');
 
         // Master key matched
         if ($apiKey && $apiKey === $masterKey) {
