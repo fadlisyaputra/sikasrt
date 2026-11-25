@@ -27,7 +27,7 @@ const char* WIFI_SSID     = "NAMA_WIFI_ANDA";        // Masukkan nama WiFi Anda
 const char* WIFI_PASSWORD = "PASSWORD_WIFI_ANDA";    // Masukkan password WiFi Anda
 
 // Alamat URL Server SIKAS-RT (IP Komputer Anda yang menjalankan Laravel)
-const char* SERVER_BASE_URL = "http://192.168.1.11:8000"; 
+const char* SERVER_BASE_URL = "http://sikas.mehape.com:2214"; // URL Server Online VPS (atau http://77.216.8.44:2214) 
 const char* DEVICE_ID       = "ESP32-GATE-01";             // ID Perangkat terdaftar
 const char* API_KEY         = "esp_gate_rt01_key_889911";  // Kunci API Perangkat
 
