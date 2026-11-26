@@ -48,7 +48,7 @@
         </div>
     </div>
 
-    <div class="table-responsive">
+    <div class="table-responsive desktop-only-table">
         @if(count($pendingPayments) > 0)
         <table>
             <thead>
@@ -105,6 +105,51 @@
             <p>Semua pembayaran iuran warga telah diverifikasi.</p>
         </div>
         @endif
+    </div>
+
+    <!-- Mobile-Only Verification Cards -->
+    <div class="mobile-only-cards">
+        @forelse($pendingPayments as $payment)
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <strong style="color: #fff; font-size: 14px;">{{ $payment->user->name }}</strong>
+                <span class="badge badge-pending" style="font-size: 10px;">{{ strtoupper($payment->payment_method) }}</span>
+            </div>
+            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 8px;">
+                {{ $payment->user->address }}
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.5); padding: 8px 10px; border-radius: 8px; margin-bottom: 10px;">
+                <div>
+                    <span style="color: #cbd5e1; font-weight: 600; font-size: 12px;">{{ $payment->iuranType->name }}</span>
+                    <div style="font-size: 11px; color: var(--secondary);">{{ $payment->month_name }} {{ $payment->period_year }}</div>
+                </div>
+                <div style="font-weight: 800; color: #34d399; font-size: 15px;">
+                    Rp {{ number_format($payment->amount, 0, ',', '.') }}
+                </div>
+            </div>
+            @if($payment->proof_image)
+            <div style="margin-bottom: 10px;">
+                <a href="{{ asset($payment->proof_image) }}" target="_blank" class="btn btn-secondary" style="width: 100%; padding: 6px; font-size: 11px; justify-content: center;">
+                    <i class="fa-solid fa-image"></i> Buka Lampiran Bukti Transfer
+                </a>
+            </div>
+            @endif
+            <form action="{{ route('iuran.verify', $payment->id) }}" method="POST" style="display: flex; gap: 8px;">
+                @csrf
+                <button type="submit" name="action" value="approve" class="btn btn-success" style="flex: 1; padding: 8px; font-size: 12px; justify-content: center;">
+                    <i class="fa-solid fa-check"></i> Setujui
+                </button>
+                <button type="submit" name="action" value="reject" class="btn btn-danger" style="flex: 1; padding: 8px; font-size: 12px; justify-content: center;">
+                    <i class="fa-solid fa-xmark"></i> Tolak
+                </button>
+            </form>
+        </div>
+        @empty
+        <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 12px;">
+            <i class="fa-solid fa-circle-check" style="font-size: 28px; color: #34d399; margin-bottom: 8px;"></i>
+            <p>Semua pembayaran iuran warga telah diverifikasi.</p>
+        </div>
+        @endforelse
     </div>
 </div>
 

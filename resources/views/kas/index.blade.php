@@ -72,7 +72,7 @@
         </div>
     </div>
 
-    <div class="table-responsive">
+    <div class="desktop-only-table table-responsive">
         <table>
             <thead>
                 <tr>
@@ -131,6 +131,57 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+
+    <!-- Mobile-Only Kas Cards -->
+    <div class="mobile-only-cards" style="margin-top: 10px;">
+        @forelse($transactions as $tx)
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 11px; color: var(--text-muted);">
+                    <i class="fa-regular fa-calendar"></i> {{ \Carbon\Carbon::parse($tx->transaction_date)->format('d M Y') }}
+                </span>
+                <span class="badge {{ $tx->type === 'pemasukan' ? 'badge-success' : 'badge-danger' }}" style="font-size: 10px; padding: 2px 7px;">
+                    {{ strtoupper($tx->type) }}
+                </span>
+            </div>
+
+            <div style="margin-bottom: 8px;">
+                <strong style="color: #fff; font-size: 14px;">{{ $tx->category }}</strong>
+                <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;">{{ $tx->description }}</div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.5); padding: 8px 10px; border-radius: 8px; margin-bottom: 8px;">
+                <div style="font-size: 11px; color: var(--text-muted);">
+                    Oleh: {{ $tx->creator->name ?? 'System' }}
+                </div>
+                <div style="font-weight: 800; font-size: 15px; color: {{ $tx->type === 'pemasukan' ? '#34d399' : '#f87171' }};">
+                    {{ $tx->type === 'pemasukan' ? '+' : '-' }} Rp {{ number_format($tx->amount, 0, ',', '.') }}
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center; justify-content: flex-end;">
+                @if($tx->receipt_file)
+                <a href="{{ asset($tx->receipt_file) }}" target="_blank" class="btn btn-secondary" style="flex: 1; padding: 6px; font-size: 11px; justify-content: center;">
+                    <i class="fa-solid fa-paperclip"></i> Bukti Nota
+                </a>
+                @endif
+                @if(in_array(auth()->user()->role, ['superadmin', 'bendahara']))
+                <form action="{{ route('kas.destroy', $tx->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus catatan kas ini?');" style="margin: 0;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger" style="padding: 6px 12px; font-size: 11px;">
+                        <i class="fa-solid fa-trash"></i> Hapus
+                    </button>
+                </form>
+                @endif
+            </div>
+        </div>
+        @empty
+        <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 12px;">
+            Tidak ada transaksi kas ditemukan.
+        </div>
+        @endforelse
     </div>
 
     <div style="margin-top: 20px;">

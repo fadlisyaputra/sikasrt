@@ -39,7 +39,7 @@
 
 <!-- Users Table -->
 <div class="card">
-    <div class="table-responsive">
+    <div class="desktop-only-table table-responsive">
         <table>
             <thead>
                 <tr>
@@ -109,6 +109,57 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+
+    <!-- Mobile-Only User Directory Cards -->
+    <div class="mobile-only-cards" style="margin-top: 10px;">
+        @forelse($users as $u)
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <strong style="color: #fff; font-size: 14px;">{{ $u->name }}</strong>
+                <span class="user-role-badge role-{{ $u->role }}">{{ strtoupper($u->role) }}</span>
+            </div>
+
+            <div style="font-size: 11.5px; color: var(--text-muted); margin-bottom: 8px;">
+                <i class="fa-solid fa-location-dot"></i> {{ $u->address ?? '-' }} ({{ $u->rt_rw }})
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.5); padding: 8px 10px; border-radius: 8px; margin-bottom: 10px; font-size: 11.5px;">
+                <div>
+                    <div style="color: #cbd5e1;"><i class="fa-solid fa-envelope"></i> {{ $u->email }}</div>
+                    @if($u->phone)
+                    <div style="color: #38bdf8; margin-top: 2px;"><i class="fa-solid fa-phone"></i> {{ $u->phone }}</div>
+                    @endif
+                </div>
+                <div style="text-align: right;">
+                    <span class="badge {{ $u->status_warga === 'tetap' ? 'badge-success' : 'badge-pending' }}" style="font-size: 9.5px; padding: 2px 7px;">
+                        {{ strtoupper($u->status_warga) }}
+                    </span>
+                    @if($u->rfid_uid)
+                    <div style="margin-top: 4px; font-family: monospace; font-size: 10px; color: #38bdf8;">
+                        <i class="fa-solid fa-id-card"></i> {{ $u->rfid_uid }}
+                    </div>
+                    @endif
+                </div>
+            </div>
+
+            @if(auth()->user()->role === 'superadmin' && $u->id !== auth()->id())
+            <div style="display: flex; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
+                <form action="{{ route('warga.destroy', $u->id) }}" method="POST" onsubmit="return confirm('Hapus pengguna {{ $u->name }}?');" style="margin: 0;">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger" style="padding: 6px 14px; font-size: 11.5px;">
+                        <i class="fa-solid fa-trash"></i> Hapus Pengguna
+                    </button>
+                </form>
+            </div>
+            @endif
+        </div>
+        @empty
+        <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 12px;">
+            Tidak ada pengguna ditemukan.
+        </div>
+        @endforelse
     </div>
 
     <div style="margin-top: 20px;">

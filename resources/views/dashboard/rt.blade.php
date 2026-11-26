@@ -74,7 +74,7 @@
             <a href="{{ route('warga.index') }}" class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;">Direktori Warga</a>
         </div>
 
-        <div class="table-responsive">
+        <div class="desktop-only-table table-responsive">
             <table>
                 <thead>
                     <tr>
@@ -102,6 +102,28 @@
                     @endforeach
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile-Only Warga Status Cards -->
+        <div class="mobile-only-cards">
+            @foreach($wargaStatusList as $warga)
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong style="color: #fff; font-size: 13.5px;">{{ $warga->name }}</strong>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">{{ $warga->address }}</div>
+                    @if($warga->phone)
+                    <div style="font-size: 10px; color: #38bdf8; margin-top: 2px;"><i class="fa-solid fa-phone"></i> {{ $warga->phone }}</div>
+                    @endif
+                </div>
+                <div style="text-align: right; flex-shrink: 0; margin-left: 8px;">
+                    @if($warga->has_paid)
+                        <span class="badge badge-success" style="font-size: 10px; padding: 3px 8px;"><i class="fa-solid fa-check"></i> Lunas</span>
+                    @else
+                        <span class="badge badge-danger" style="font-size: 10px; padding: 3px 8px;"><i class="fa-solid fa-clock"></i> Belum</span>
+                    @endif
+                </div>
+            </div>
+            @endforeach
         </div>
     </div>
 

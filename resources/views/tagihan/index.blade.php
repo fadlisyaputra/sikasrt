@@ -62,12 +62,12 @@
     </div>
 
     <!-- Filter & Aksi Tambah Tagihan -->
-    <div class="card" style="padding: 18px 24px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-            <form action="{{ route('tagihan.index') }}" method="GET" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0;">
-                <div style="display: flex; align-items: center; gap: 6px;">
-                    <label style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Bulan:</label>
-                    <select name="month" class="form-control" style="width: auto; padding: 6px 12px; font-size: 13px;">
+    <div class="card" style="padding: 18px 20px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+            <form action="{{ route('tagihan.index') }}" method="GET" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0; width: 100%; max-width: 700px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex: 1 1 110px;">
+                    <label style="font-size: 11px; color: var(--text-muted); font-weight: 600; white-space: nowrap;">Bulan:</label>
+                    <select name="month" class="form-control" style="padding: 6px 10px; font-size: 12px;">
                         @for($m = 1; $m <= 12; $m++)
                             <option value="{{ $m }}" {{ $selectedMonth == $m ? 'selected' : '' }}>
                                 {{ DateTime::createFromFormat('!m', $m)->format('F') }}
@@ -76,18 +76,18 @@
                     </select>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 6px;">
-                    <label style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Tahun:</label>
-                    <select name="year" class="form-control" style="width: auto; padding: 6px 12px; font-size: 13px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex: 1 1 95px;">
+                    <label style="font-size: 11px; color: var(--text-muted); font-weight: 600; white-space: nowrap;">Tahun:</label>
+                    <select name="year" class="form-control" style="padding: 6px 10px; font-size: 12px;">
                         @for($y = date('Y') - 1; $y <= date('Y') + 1; $y++)
                             <option value="{{ $y }}" {{ $selectedYear == $y ? 'selected' : '' }}>{{ $y }}</option>
                         @endfor
                     </select>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 6px;">
-                    <label style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Status:</label>
-                    <select name="status" class="form-control" style="width: auto; padding: 6px 12px; font-size: 13px;">
+                <div style="display: flex; align-items: center; gap: 6px; flex: 1 1 130px;">
+                    <label style="font-size: 11px; color: var(--text-muted); font-weight: 600; white-space: nowrap;">Status:</label>
+                    <select name="status" class="form-control" style="padding: 6px 10px; font-size: 12px;">
                         <option value="all" {{ $selectedStatus === 'all' ? 'selected' : '' }}>Semua Status</option>
                         <option value="unpaid" {{ $selectedStatus === 'unpaid' ? 'selected' : '' }}>Belum Lunas</option>
                         <option value="pending" {{ $selectedStatus === 'pending' ? 'selected' : '' }}>Menunggu Verifikasi</option>
@@ -96,28 +96,30 @@
                 </div>
 
                 @if(!auth()->user()->isWarga())
-                <input type="text" name="search" class="form-control" placeholder="Cari nama warga..." value="{{ request('search') }}" style="width: 180px; padding: 6px 12px; font-size: 13px;">
+                <div style="flex: 2 1 160px;">
+                    <input type="text" name="search" class="form-control" placeholder="Cari nama warga..." value="{{ request('search') }}" style="padding: 6px 10px; font-size: 12px;">
+                </div>
                 @endif
 
-                <button type="submit" class="btn btn-secondary" style="padding: 6px 14px; font-size: 12px;">
+                <button type="submit" class="btn btn-secondary" style="padding: 6px 14px; font-size: 12px; flex: 0 0 auto;">
                     <i class="fa-solid fa-filter"></i> Filter
                 </button>
             </form>
 
             @if(in_array(auth()->user()->role, ['superadmin', 'bendahara', 'rt']))
-            <div style="display: flex; gap: 10px;">
-                <button type="button" onclick="document.getElementById('modalGenerate').style.display='block'" class="btn btn-primary" style="font-size: 13px; font-weight: 700;">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Tagihan Bulanan
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; width: 100%; max-width: 480px; justify-content: flex-end;">
+                <button type="button" onclick="document.getElementById('modalGenerate').style.display='block'" class="btn btn-primary" style="font-size: 12px; font-weight: 700; flex: 1 1 auto; justify-content: center;">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Tagihan
                 </button>
-                <button type="button" onclick="document.getElementById('modalTambahTagihan').style.display='block'" class="btn btn-secondary" style="font-size: 13px;">
-                    <i class="fa-solid fa-plus"></i> Tambah Tagihan Manual
+                <button type="button" onclick="document.getElementById('modalTambahTagihan').style.display='block'" class="btn btn-secondary" style="font-size: 12px; flex: 1 1 auto; justify-content: center;">
+                    <i class="fa-solid fa-plus"></i> Tambah Tagihan
                 </button>
             </div>
             @endif
         </div>
     </div>
 
-    <!-- Tabel Daftar Tagihan Warga -->
+    <!-- Tabel / List Kartu Tagihan Warga -->
     <div class="card">
         <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 14px;">
             <h3 class="card-title">
@@ -129,7 +131,8 @@
             </span>
         </div>
 
-        <div style="overflow-x: auto; margin-top: 14px;">
+        <!-- Desktop View: Table Mode -->
+        <div class="desktop-only-table table-responsive" style="margin-top: 14px;">
             <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
                 <thead>
                     <tr style="border-bottom: 1px solid var(--border-color); color: var(--text-muted); text-align: left;">
@@ -212,6 +215,81 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile View: Modern Cards (100% Fit, Zero Cut-off) -->
+        <div class="mobile-only-cards" style="margin-top: 14px;">
+            @forelse($bills as $bill)
+            <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px; box-shadow: 0 4px 14px rgba(0,0,0,0.25);">
+                <!-- Header Card: Invoice Code & Status -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.06); padding-bottom: 8px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-file-invoice" style="color: #38bdf8; font-size: 13px;"></i>
+                        <span style="font-family: monospace; font-weight: 700; color: #38bdf8; font-size: 13px;">{{ $bill->bill_code }}</span>
+                    </div>
+                    <div>
+                        @if($bill->status === 'paid')
+                            <span class="badge badge-success" style="font-size: 10px; padding: 3px 8px;"><i class="fa-solid fa-circle-check"></i> Lunas</span>
+                        @elseif($bill->status === 'pending')
+                            <span class="badge badge-pending" style="font-size: 10px; padding: 3px 8px;"><i class="fa-solid fa-clock"></i> Verifikasi</span>
+                        @else
+                            <span class="badge badge-danger" style="font-size: 10px; padding: 3px 8px;"><i class="fa-solid fa-circle-xmark"></i> Belum Bayar</span>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Info Warga & Iuran -->
+                <div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <strong style="color: #fff; font-size: 14px;">{{ $bill->user->name }}</strong>
+                        <span style="font-size: 11px; color: var(--text-muted);">{{ $bill->user->address ?? 'RT 01' }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
+                        <span style="color: #cbd5e1; font-weight: 600;">{{ $bill->iuranType->name }}</span>
+                        <span style="color: var(--secondary); font-size: 11px; font-weight: 600;">
+                            {{ \Carbon\Carbon::create()->month($bill->period_month)->translatedFormat('F') }} {{ $bill->period_year }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Jatuh Tempo & Nominal Highlight -->
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.5); padding: 8px 10px; border-radius: 8px; margin-bottom: 12px;">
+                    <div style="font-size: 11px; color: {{ $bill->isOverdue() ? '#f87171' : 'var(--text-muted)' }};">
+                        <i class="fa-regular fa-calendar-xmark"></i> Jatuh Tempo: {{ \Carbon\Carbon::parse($bill->due_date)->translatedFormat('d M Y') }}
+                        @if($bill->isOverdue())
+                            <span class="badge badge-danger" style="font-size: 8.5px; padding: 1px 5px; margin-left: 2px;">Terlambat</span>
+                        @endif
+                    </div>
+                    <div style="font-size: 15px; font-weight: 800; color: #34d399;">
+                        Rp {{ number_format($bill->amount, 0, ',', '.') }}
+                    </div>
+                </div>
+
+                <!-- Action Buttons: Touch Friendly & Full Width -->
+                <div style="display: flex; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                    <a href="{{ route('tagihan.invoice', $bill->id) }}" target="_blank" class="btn btn-secondary" style="flex: 1; padding: 8px 10px; font-size: 12px; justify-content: center;">
+                        <i class="fa-solid fa-print"></i> Kuitansi
+                    </a>
+
+                    @if(auth()->user()->isWarga() && $bill->status === 'unpaid')
+                    <button type="button" onclick="openBayarModal({{ $bill->id }}, '{{ $bill->bill_code }}', '{{ $bill->iuranType->name }}', {{ $bill->amount }})" class="btn btn-success" style="flex: 1.2; padding: 8px 10px; font-size: 12px; justify-content: center;">
+                        <i class="fa-solid fa-wallet"></i> Bayar Sekarang
+                    </button>
+                    @endif
+
+                    @if(in_array(auth()->user()->role, ['superadmin', 'bendahara', 'rt']) && $bill->status !== 'paid')
+                    <button type="button" onclick="openMarkPaidModal({{ $bill->id }}, '{{ $bill->bill_code }}', '{{ $bill->user->name }}', {{ $bill->amount }})" class="btn btn-primary" style="flex: 1.4; padding: 8px 10px; font-size: 12px; justify-content: center;">
+                        <i class="fa-solid fa-check-double"></i> Tandai Lunas
+                    </button>
+                    @endif
+                </div>
+            </div>
+            @empty
+            <div style="text-align: center; padding: 30px 14px; background: rgba(15, 23, 42, 0.5); border-radius: 12px; color: var(--text-muted);">
+                <i class="fa-solid fa-file-invoice" style="font-size: 36px; margin-bottom: 8px; opacity: 0.3;"></i>
+                <p style="font-size: 13px;">Tidak ada data tagihan ditemukan untuk kriteria filter ini.</p>
+            </div>
+            @endforelse
         </div>
 
         <div style="margin-top: 20px;">

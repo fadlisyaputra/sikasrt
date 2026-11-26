@@ -45,7 +45,7 @@
         </div>
     </div>
 
-    <div class="table-responsive">
+    <div class="desktop-only-table table-responsive">
         <table>
             <thead>
                 <tr>
@@ -108,6 +108,57 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+
+    <!-- Mobile-Only Iuran List Cards -->
+    <div class="mobile-only-cards" style="margin-top: 10px;">
+        @forelse($payments as $p)
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-color); border-radius: 14px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-family: monospace; font-size: 12px; color: #38bdf8; font-weight: 700;">#{{ $p->id }}</span>
+                <div>
+                    @if($p->status === 'approved')
+                        <span class="badge badge-success" style="font-size: 10px; padding: 2px 8px;"><i class="fa-solid fa-check"></i> Disetujui</span>
+                    @elseif($p->status === 'pending')
+                        <span class="badge badge-pending" style="font-size: 10px; padding: 2px 8px;"><i class="fa-solid fa-clock"></i> Pending</span>
+                    @else
+                        <span class="badge badge-danger" style="font-size: 10px; padding: 2px 8px;"><i class="fa-solid fa-xmark"></i> Ditolak</span>
+                    @endif
+                </div>
+            </div>
+
+            <div style="margin-bottom: 10px;">
+                <strong style="color: #fff; font-size: 14px;">{{ $p->user->name }}</strong>
+                <div style="font-size: 11px; color: var(--text-muted);">{{ $p->user->address }}</div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(30, 41, 59, 0.5); padding: 8px 10px; border-radius: 8px; margin-bottom: 10px;">
+                <div>
+                    <span style="color: #cbd5e1; font-weight: 600; font-size: 12px;">{{ $p->iuranType->name }}</span>
+                    <div style="font-size: 11px; color: var(--secondary);">{{ $p->month_name }} {{ $p->period_year }} &bull; {{ strtoupper($p->payment_method) }}</div>
+                </div>
+                <div style="font-weight: 800; color: #34d399; font-size: 15px;">
+                    Rp {{ number_format($p->amount, 0, ',', '.') }}
+                </div>
+            </div>
+
+            @if(in_array(auth()->user()->role, ['superadmin', 'bendahara']) && $p->status === 'pending')
+            <form action="{{ route('iuran.verify', $p->id) }}" method="POST" style="display: flex; gap: 8px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                @csrf
+                <button type="submit" name="action" value="approve" class="btn btn-success" style="flex: 1; padding: 8px; font-size: 12px; justify-content: center;">
+                    <i class="fa-solid fa-check"></i> Setujui
+                </button>
+                <button type="submit" name="action" value="reject" class="btn btn-danger" style="flex: 1; padding: 8px; font-size: 12px; justify-content: center;">
+                    <i class="fa-solid fa-xmark"></i> Tolak
+                </button>
+            </form>
+            @endif
+        </div>
+        @empty
+        <div style="text-align: center; padding: 24px; color: var(--text-muted); font-size: 12px;">
+            Belum ada data transaksi iuran.
+        </div>
+        @endforelse
     </div>
 
     <div style="margin-top: 20px;">

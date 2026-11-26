@@ -534,18 +534,67 @@
             font-weight: 500;
         }
 
-        /* Modern Tables */
+        /* Modern Tables & Responsive View Helpers */
         .table-responsive {
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             border-radius: 12px;
+            width: 100%;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            min-width: 500px;
+        }
+
+        /* Desktop vs Mobile Table/Card Display Helpers */
+        .desktop-only-table {
+            display: block;
+            width: 100%;
+        }
+
+        .mobile-only-cards {
+            display: none;
+            width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .desktop-only-table {
+                display: none !important;
+            }
+            .mobile-only-cards {
+                display: flex !important;
+                flex-direction: column;
+                gap: 12px;
+                width: 100%;
+            }
+            table {
+                min-width: 100% !important;
+                width: 100% !important;
+            }
+            th, td {
+                padding: 10px 8px !important;
+                font-size: 11.5px !important;
+                white-space: normal !important;
+                word-break: break-word !important;
+            }
+            .table-responsive {
+                width: 100% !important;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin-bottom: 8px;
+            }
+            .table-responsive::-webkit-scrollbar {
+                height: 5px;
+            }
+            .table-responsive::-webkit-scrollbar-track {
+                background: rgba(15, 23, 42, 0.6);
+            }
+            .table-responsive::-webkit-scrollbar-thumb {
+                background: rgba(99, 102, 241, 0.4);
+                border-radius: 4px;
+            }
         }
 
         th {
@@ -787,6 +836,25 @@
                 width: 100%;
                 text-align: center;
                 justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content-body {
+                padding: 12px 10px 84px 10px !important;
+            }
+            .card {
+                padding: 14px 12px !important;
+                border-radius: 12px !important;
+            }
+            .metric-value {
+                font-size: 20px !important;
+            }
+            .topbar {
+                padding: 0 12px !important;
+            }
+            .page-title h1 {
+                font-size: 14px !important;
             }
         }
     </style>

@@ -225,7 +225,7 @@
             </div>
         </div>
 
-        <div class="table-responsive">
+        <div class="desktop-only-table table-responsive">
             <table>
                 <thead>
                     <tr>
@@ -258,6 +258,38 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+
+        <!-- Mobile-Only Payment History Cards -->
+        <div class="mobile-only-cards">
+            @forelse($myPayments as $payment)
+            <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong style="color: #fff; font-size: 13.5px;">{{ $payment->iuranType->name }}</strong>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 2px;">
+                        <i class="fa-regular fa-calendar"></i> {{ $payment->month_name }} {{ $payment->period_year }}
+                    </div>
+                </div>
+                <div style="text-align: right; flex-shrink: 0; margin-left: 8px;">
+                    <div style="font-weight: 800; color: #34d399; font-size: 14px;">
+                        Rp {{ number_format($payment->amount, 0, ',', '.') }}
+                    </div>
+                    <div style="margin-top: 4px;">
+                        @if($payment->status === 'approved')
+                            <span class="badge badge-success" style="font-size: 9.5px; padding: 2px 7px;">Disetujui</span>
+                        @elseif($payment->status === 'pending')
+                            <span class="badge badge-pending" style="font-size: 9.5px; padding: 2px 7px;">Verifikasi</span>
+                        @else
+                            <span class="badge badge-danger" style="font-size: 9.5px; padding: 2px 7px;">Ditolak</span>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @empty
+            <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 12px;">
+                Belum ada riwayat pembayaran.
+            </div>
+            @endforelse
         </div>
     </div>
 </div>
