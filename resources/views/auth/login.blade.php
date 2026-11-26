@@ -367,17 +367,17 @@
                         <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Login Cepat Demo (1-Klik)
                     </div>
                     <div class="role-grid">
-                        <a href="{{ route('quick-login', 'admin@kasrt.local') }}" class="role-btn">
-                            <i class="fa-solid fa-user-shield" style="color: #f87171;"></i> Superadmin
-                        </a>
-                        <a href="{{ route('quick-login', 'bendahara@kasrt.local') }}" class="role-btn">
-                            <i class="fa-solid fa-calculator" style="color: #34d399;"></i> Bendahara
-                        </a>
-                        <a href="{{ route('quick-login', 'rt@kasrt.local') }}" class="role-btn">
-                            <i class="fa-solid fa-crown" style="color: #38bdf8;"></i> Ketua RT
-                        </a>
+                        <button type="button" onclick="promptPengurusAccess('admin@kasrt.local', 'Superadmin')" class="role-btn" style="cursor: pointer; width: 100%; text-align: left;">
+                            <i class="fa-solid fa-user-shield" style="color: #f87171;"></i> Superadmin 🔒
+                        </button>
+                        <button type="button" onclick="promptPengurusAccess('bendahara@kasrt.local', 'Bendahara')" class="role-btn" style="cursor: pointer; width: 100%; text-align: left;">
+                            <i class="fa-solid fa-calculator" style="color: #34d399;"></i> Bendahara 🔒
+                        </button>
+                        <button type="button" onclick="promptPengurusAccess('rt@kasrt.local', 'Ketua RT')" class="role-btn" style="cursor: pointer; width: 100%; text-align: left;">
+                            <i class="fa-solid fa-crown" style="color: #38bdf8;"></i> Ketua RT 🔒
+                        </button>
                         <a href="{{ route('quick-login', 'budi@kasrt.local') }}" class="role-btn">
-                            <i class="fa-solid fa-house-user" style="color: #fbbf24;"></i> Warga
+                            <i class="fa-solid fa-house-user" style="color: #fbbf24;"></i> Warga (Bebas)
                         </a>
                     </div>
                 </div>
@@ -402,6 +402,13 @@
                 <p>Masukkan email & kata sandi atau gunakan Login Cepat Demo di bawah</p>
             </div>
 
+            @if(session('error'))
+                <div class="alert-danger">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+
             @if($errors->any())
                 <div class="alert-danger">
                     <i class="fa-solid fa-circle-exclamation"></i>
@@ -419,12 +426,26 @@
                     </div>
                 </div>
 
-                <div class="form-group" style="margin-bottom: 22px;">
+                <div class="form-group">
                     <label>Kata Sandi</label>
                     <div class="input-icon-wrapper">
                         <i class="fa-solid fa-lock"></i>
                         <input type="password" name="password" class="form-control" placeholder="••••••••" required>
                     </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 22px;">
+                    <label style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>Kode Akses Pengurus</span>
+                        <span style="font-size: 11px; color: #fbbf24; font-weight: 600;"><i class="fa-solid fa-shield-halved"></i> Khusus Admin/RT/Bendahara</span>
+                    </label>
+                    <div class="input-icon-wrapper">
+                        <i class="fa-solid fa-key"></i>
+                        <input type="password" name="access_code" class="form-control" placeholder="PIN Pengurus (Warga kosongkan)">
+                    </div>
+                    @if($errors->has('access_code'))
+                        <div style="font-size: 11.5px; color: #f87171; margin-top: 4px;">{{ $errors->first('access_code') }}</div>
+                    @endif
                 </div>
 
                 <button type="submit" class="btn-submit">
@@ -438,18 +459,18 @@
                     <i class="fa-solid fa-bolt"></i> Login Cepat Demo (1-Klik)
                 </div>
                 <div class="mobile-quick-grid">
-                    <a href="{{ route('quick-login', 'admin@kasrt.local') }}" class="mobile-role-card card-superadmin">
+                    <button type="button" onclick="promptPengurusAccess('admin@kasrt.local', 'Superadmin')" class="mobile-role-card card-superadmin" style="cursor: pointer; width: 100%;">
                         <i class="fa-solid fa-user-shield"></i>
-                        <span>Superadmin</span>
-                    </a>
-                    <a href="{{ route('quick-login', 'bendahara@kasrt.local') }}" class="mobile-role-card card-bendahara">
+                        <span>Superadmin 🔒</span>
+                    </button>
+                    <button type="button" onclick="promptPengurusAccess('bendahara@kasrt.local', 'Bendahara')" class="mobile-role-card card-bendahara" style="cursor: pointer; width: 100%;">
                         <i class="fa-solid fa-calculator"></i>
-                        <span>Bendahara</span>
-                    </a>
-                    <a href="{{ route('quick-login', 'rt@kasrt.local') }}" class="mobile-role-card card-rt">
+                        <span>Bendahara 🔒</span>
+                    </button>
+                    <button type="button" onclick="promptPengurusAccess('rt@kasrt.local', 'Ketua RT')" class="mobile-role-card card-rt" style="cursor: pointer; width: 100%;">
                         <i class="fa-solid fa-crown"></i>
-                        <span>Ketua RT</span>
-                    </a>
+                        <span>Ketua RT 🔒</span>
+                    </button>
                     <a href="{{ route('quick-login', 'budi@kasrt.local') }}" class="mobile-role-card card-warga">
                         <i class="fa-solid fa-house-user"></i>
                         <span>Warga RT</span>
@@ -458,6 +479,84 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal Kode Akses Pengurus RT -->
+    <div id="modalAccessCode" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 16px;">
+        <div style="background: #1e293b; border: 1px solid #475569; border-radius: 20px; max-width: 420px; width: 100%; padding: 26px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6); position: relative;">
+            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 14px;">
+                <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 22px; flex-shrink: 0;">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 17px; font-weight: 700; color: #fff;">Verifikasi Kode Akses</h3>
+                    <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 2px;">Masuk sebagai <strong id="macRoleLabel" style="color: #38bdf8;">Superadmin</strong></p>
+                </div>
+            </div>
+
+            <p style="font-size: 12px; color: #94a3b8; line-height: 1.5; margin-bottom: 16px;">
+                Untuk keamanan data RT, akun pengurus (Superadmin, Bendahara, dan Ketua RT) dilindungi dengan kode akses keamanan.
+            </p>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">
+                    Masukkan Kode Akses Pengurus
+                </label>
+                <div class="input-icon-wrapper">
+                    <i class="fa-solid fa-key" style="color: #64748b;"></i>
+                    <input type="password" id="macInputCode" class="form-control" placeholder="Contoh: RT2026" autocomplete="off" style="font-size: 14px; padding: 12px 14px 12px 42px;">
+                </div>
+                <div style="font-size: 11px; color: #fbbf24; margin-top: 6px; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-circle-info"></i> Kode Akses Pengurus: <strong>RT2026</strong>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="closeAccessModal()" style="flex: 1; padding: 12px; background: #334155; border: none; border-radius: 12px; color: #fff; font-size: 13px; font-weight: 600; cursor: pointer;">
+                    Batal
+                </button>
+                <button type="button" onclick="submitAccessCode()" style="flex: 1.5; padding: 12px; background: linear-gradient(135deg, #6366f1, #4f46e5); border: none; border-radius: 12px; color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span>Verifikasi & Masuk</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTargetEmail = '';
+
+        function promptPengurusAccess(email, roleName) {
+            currentTargetEmail = email;
+            document.getElementById('macRoleLabel').textContent = roleName;
+            const input = document.getElementById('macInputCode');
+            input.value = '';
+            document.getElementById('modalAccessCode').style.display = 'flex';
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function closeAccessModal() {
+            document.getElementById('modalAccessCode').style.display = 'none';
+            currentTargetEmail = '';
+        }
+
+        function submitAccessCode() {
+            const code = document.getElementById('macInputCode').value.trim();
+            if (!code) {
+                alert('Silakan masukkan Kode Akses Pengurus!');
+                document.getElementById('macInputCode').focus();
+                return;
+            }
+            const url = `{{ url('/quick-login') }}/${encodeURIComponent(currentTargetEmail)}?code=${encodeURIComponent(code)}`;
+            window.location.href = url;
+        }
+
+        document.getElementById('macInputCode').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                submitAccessCode();
+            } else if (e.key === 'Escape') {
+                closeAccessModal();
+            }
+        });
+    </script>
 
 </body>
 </html>

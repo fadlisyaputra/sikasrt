@@ -974,9 +974,9 @@
                 <!-- Desktop Demo Quick Switcher -->
                 <div class="quick-role-bar">
                     <span class="quick-role-label"><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Demo:</span>
-                    <a href="{{ route('quick-login', 'admin@kasrt.local') }}" class="btn-role-chip" style="{{ auth()->user()->role === 'superadmin' ? 'color:#fca5a5; font-weight:700; background:rgba(239,68,68,0.2);' : '' }}">Admin</a>
-                    <a href="{{ route('quick-login', 'bendahara@kasrt.local') }}" class="btn-role-chip" style="{{ auth()->user()->role === 'bendahara' ? 'color:#6ee7b7; font-weight:700; background:rgba(16,185,129,0.2);' : '' }}">Bendahara</a>
-                    <a href="{{ route('quick-login', 'rt@kasrt.local') }}" class="btn-role-chip" style="{{ auth()->user()->role === 'rt' ? 'color:#7dd3fc; font-weight:700; background:rgba(14,165,233,0.2);' : '' }}">RT</a>
+                    <button type="button" onclick="promptPengurusAccess('admin@kasrt.local', 'Superadmin')" class="btn-role-chip" style="background:none; border:none; cursor:pointer; {{ auth()->user()->role === 'superadmin' ? 'color:#fca5a5; font-weight:700; background:rgba(239,68,68,0.2);' : '' }}">Admin 🔒</button>
+                    <button type="button" onclick="promptPengurusAccess('bendahara@kasrt.local', 'Bendahara')" class="btn-role-chip" style="background:none; border:none; cursor:pointer; {{ auth()->user()->role === 'bendahara' ? 'color:#6ee7b7; font-weight:700; background:rgba(16,185,129,0.2);' : '' }}">Bendahara 🔒</button>
+                    <button type="button" onclick="promptPengurusAccess('rt@kasrt.local', 'Ketua RT')" class="btn-role-chip" style="background:none; border:none; cursor:pointer; {{ auth()->user()->role === 'rt' ? 'color:#7dd3fc; font-weight:700; background:rgba(14,165,233,0.2);' : '' }}">RT 🔒</button>
                     <a href="{{ route('quick-login', 'budi@kasrt.local') }}" class="btn-role-chip" style="{{ auth()->user()->role === 'warga' ? 'color:#fde047; font-weight:700; background:rgba(245,158,11,0.2);' : '' }}">Warga</a>
                 </div>
             </div>
@@ -987,15 +987,15 @@
             <span style="font-size: 11px; font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 4px; padding-left: 2px;">
                 <i class="fa-solid fa-bolt"></i> Demo:
             </span>
-            <a href="{{ route('quick-login', 'admin@kasrt.local') }}" class="mobile-role-pill {{ auth()->user()->role === 'superadmin' ? 'active' : '' }}">
-                <i class="fa-solid fa-user-shield" style="color: #f87171;"></i> Superadmin
-            </a>
-            <a href="{{ route('quick-login', 'bendahara@kasrt.local') }}" class="mobile-role-pill {{ auth()->user()->role === 'bendahara' ? 'active' : '' }}">
-                <i class="fa-solid fa-calculator" style="color: #34d399;"></i> Bendahara
-            </a>
-            <a href="{{ route('quick-login', 'rt@kasrt.local') }}" class="mobile-role-pill {{ auth()->user()->role === 'rt' ? 'active' : '' }}">
-                <i class="fa-solid fa-crown" style="color: #38bdf8;"></i> Ketua RT
-            </a>
+            <button type="button" onclick="promptPengurusAccess('admin@kasrt.local', 'Superadmin')" class="mobile-role-pill {{ auth()->user()->role === 'superadmin' ? 'active' : '' }}" style="background: rgba(30, 41, 59, 0.8); cursor: pointer;">
+                <i class="fa-solid fa-user-shield" style="color: #f87171;"></i> Superadmin 🔒
+            </button>
+            <button type="button" onclick="promptPengurusAccess('bendahara@kasrt.local', 'Bendahara')" class="mobile-role-pill {{ auth()->user()->role === 'bendahara' ? 'active' : '' }}" style="background: rgba(30, 41, 59, 0.8); cursor: pointer;">
+                <i class="fa-solid fa-calculator" style="color: #34d399;"></i> Bendahara 🔒
+            </button>
+            <button type="button" onclick="promptPengurusAccess('rt@kasrt.local', 'Ketua RT')" class="mobile-role-pill {{ auth()->user()->role === 'rt' ? 'active' : '' }}" style="background: rgba(30, 41, 59, 0.8); cursor: pointer;">
+                <i class="fa-solid fa-crown" style="color: #38bdf8;"></i> Ketua RT 🔒
+            </button>
             <a href="{{ route('quick-login', 'budi@kasrt.local') }}" class="mobile-role-pill {{ auth()->user()->role === 'warga' ? 'active' : '' }}">
                 <i class="fa-solid fa-house-user" style="color: #fbbf24;"></i> Warga
             </a>
@@ -1092,6 +1092,46 @@
         </div>
     </div>
 
+    <!-- Modal Kode Akses Pengurus RT -->
+    <div id="modalAccessCode" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center; padding: 16px;">
+        <div style="background: #1e293b; border: 1px solid #475569; border-radius: 20px; max-width: 420px; width: 100%; padding: 26px; box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6); position: relative;">
+            <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 14px;">
+                <div style="width: 48px; height: 48px; border-radius: 14px; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 22px; flex-shrink: 0;">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: 17px; font-weight: 700; color: #fff;">Verifikasi Kode Akses</h3>
+                    <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 2px;">Beralih role sebagai <strong id="macRoleLabel" style="color: #38bdf8;">Superadmin</strong></p>
+                </div>
+            </div>
+
+            <p style="font-size: 12px; color: #94a3b8; line-height: 1.5; margin-bottom: 16px;">
+                Demi keamanan data RT, pergantian ke akun pengurus (Superadmin, Bendahara, dan Ketua RT) dilindungi dengan kode akses keamanan.
+            </p>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+                <label style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 6px;">
+                    Masukkan Kode Akses Pengurus
+                </label>
+                <div class="input-icon-wrapper">
+                    <input type="password" id="macInputCode" class="form-control" placeholder="Contoh: RT2026" autocomplete="off" style="font-size: 14px; padding: 12px 14px;">
+                </div>
+                <div style="font-size: 11px; color: #fbbf24; margin-top: 6px; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-circle-info"></i> Kode Akses Pengurus: <strong>RT2026</strong>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="closeAccessModal()" class="btn btn-secondary" style="flex: 1; padding: 12px; justify-content: center;">
+                    Batal
+                </button>
+                <button type="button" onclick="submitAccessCode()" class="btn btn-primary" style="flex: 1.5; padding: 12px; justify-content: center;">
+                    <span>Verifikasi & Masuk</span> <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function toggleMobileSidebar() {
             const sidebar = document.getElementById('main-sidebar');
@@ -1106,6 +1146,41 @@
         function closePanicModal() {
             document.getElementById('modal-panic').style.display = 'none';
         }
+
+        let currentTargetEmail = '';
+
+        function promptPengurusAccess(email, roleName) {
+            currentTargetEmail = email;
+            document.getElementById('macRoleLabel').textContent = roleName;
+            const input = document.getElementById('macInputCode');
+            input.value = '';
+            document.getElementById('modalAccessCode').style.display = 'flex';
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function closeAccessModal() {
+            document.getElementById('modalAccessCode').style.display = 'none';
+            currentTargetEmail = '';
+        }
+
+        function submitAccessCode() {
+            const code = document.getElementById('macInputCode').value.trim();
+            if (!code) {
+                alert('Silakan masukkan Kode Akses Pengurus!');
+                document.getElementById('macInputCode').focus();
+                return;
+            }
+            const url = `{{ url('/quick-login') }}/${encodeURIComponent(currentTargetEmail)}?code=${encodeURIComponent(code)}`;
+            window.location.href = url;
+        }
+
+        document.getElementById('macInputCode').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                submitAccessCode();
+            } else if (e.key === 'Escape') {
+                closeAccessModal();
+            }
+        });
     </script>
 
     @stack('scripts')

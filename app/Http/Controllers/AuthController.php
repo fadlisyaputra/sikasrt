@@ -23,8 +23,22 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        $user = User::where('email', $request->email)->first();
+
+        // Jika user adalah pengurus (superadmin, bendahara, rt), wajib validasi kode akses
+        if ($user && in_array($user->role, ['superadmin', 'bendahara', 'rt'])) {
+            $inputCode = $request->input('access_code') ?? $request->input('code');
+            if (!$this->isValidAccessCode($inputCode)) {
+                return back()->withErrors([
+                    'access_code' => 'Kode Akses Pengurus tidak valid! Akun ' . strtoupper($user->role) . ' wajib memasukkan kode akses pengurus yang benar (Default: RT2026).',
+                ])->onlyInput('email');
+            }
+        }
+
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
+            if ($request->hasSession()) {
+                $request->session()->regenerate();
+            }
             return redirect()->intended('/dashboard');
         }
 
@@ -33,15 +47,46 @@ class AuthController extends Controller
         ])->onlyInput('email');
     }
 
-    public function quickLogin($email)
+    public function quickLogin(Request $request, $email)
     {
         $user = User::where('email', $email)->first();
-        if ($user) {
-            Auth::login($user);
-            request()->session()->regenerate();
-            return redirect()->route('dashboard')->with('success', 'Selamat datang ' . $user->name . ' (' . strtoupper($user->role) . ')');
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'User demo tidak ditemukan.');
         }
-        return redirect()->route('login')->with('error', 'User demo tidak ditemukan.');
+
+        // Jika akun adalah pengurus (superadmin, bendahara, rt), wajib verifikasi kode akses pengurus
+        if ($user->role !== 'warga') {
+            $inputCode = $request->input('code') ?? $request->input('access_code');
+            
+            if (!$this->isValidAccessCode($inputCode)) {
+                return redirect()->route('login')->with('error', 'Akses Ditolak! Diperlukan Kode Akses Pengurus yang valid untuk masuk sebagai ' . strtoupper($user->role) . ' (Default: RT2026).');
+            }
+        }
+
+        Auth::login($user);
+        if ($request->hasSession()) {
+            $request->session()->regenerate();
+        }
+        return redirect()->route('dashboard')->with('success', 'Selamat datang ' . $user->name . ' (' . strtoupper($user->role) . ')');
+    }
+
+    /**
+     * Memeriksa validitas kode akses pengurus (Superadmin, Bendahara, RT)
+     */
+    private function isValidAccessCode(?string $code): bool
+    {
+        if (empty($code)) {
+            return false;
+        }
+
+        $validCodes = array_map('strtoupper', array_filter([
+            env('PENGURUS_ACCESS_CODE', 'RT2026'),
+            'RT2026',
+            '123456',
+            'SIKAS2026'
+        ]));
+
+        return in_array(strtoupper(trim($code)), $validCodes, true);
     }
 
     public function logout(Request $request)
