@@ -30,7 +30,7 @@ class AuthController extends Controller
             $inputCode = $request->input('access_code') ?? $request->input('code');
             if (!$this->isValidAccessCode($inputCode)) {
                 return back()->withErrors([
-                    'access_code' => 'Kode Akses Pengurus tidak valid! Akun ' . strtoupper($user->role) . ' wajib memasukkan kode akses pengurus yang benar (Default: RT2026).',
+                    'access_code' => 'Kode Akses Pengurus tidak valid! Akun ' . strtoupper($user->role) . ' wajib memasukkan kode akses pengurus yang benar.',
                 ])->onlyInput('email');
             }
         }
@@ -59,7 +59,7 @@ class AuthController extends Controller
             $inputCode = $request->input('code') ?? $request->input('access_code');
             
             if (!$this->isValidAccessCode($inputCode)) {
-                return redirect()->route('login')->with('error', 'Akses Ditolak! Diperlukan Kode Akses Pengurus yang valid untuk masuk sebagai ' . strtoupper($user->role) . ' (Default: RT2026).');
+                return redirect()->route('login')->with('error', 'Akses Ditolak! Diperlukan Kode Akses Pengurus yang valid untuk masuk sebagai ' . strtoupper($user->role) . '.');
             }
         }
 

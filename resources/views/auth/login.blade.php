@@ -503,10 +503,7 @@
                 </label>
                 <div class="input-icon-wrapper">
                     <i class="fa-solid fa-key" style="color: #64748b;"></i>
-                    <input type="password" id="macInputCode" class="form-control" placeholder="Contoh: RT2026" autocomplete="off" style="font-size: 14px; padding: 12px 14px 12px 42px;">
-                </div>
-                <div style="font-size: 11px; color: #fbbf24; margin-top: 6px; display: flex; align-items: center; gap: 6px;">
-                    <i class="fa-solid fa-circle-info"></i> Kode Akses Pengurus: <strong>RT2026</strong>
+                    <input type="password" id="macInputCode" class="form-control" placeholder="Masukkan PIN / Kode Akses..." autocomplete="off" style="font-size: 14px; padding: 12px 14px 12px 42px;">
                 </div>
             </div>
 
