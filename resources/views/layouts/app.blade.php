@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') - SIKAS-RT Smart IoT</title>
     <!-- Google Fonts: Plus Jakarta Sans -->
@@ -42,6 +42,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -52,7 +53,7 @@
             overflow-x: hidden;
         }
 
-        /* Sidebar Styling */
+        /* Sidebar Styling (Desktop & Drawer Mobile) */
         .sidebar {
             width: 260px;
             background: var(--bg-sidebar);
@@ -63,16 +64,22 @@
             top: 0;
             bottom: 0;
             left: 0;
-            z-index: 100;
-            transition: all 0.3s ease;
+            z-index: 1000;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .sidebar-brand {
-            padding: 24px 20px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .brand-header-left {
             display: flex;
             align-items: center;
             gap: 12px;
-            border-bottom: 1px solid var(--border-color);
         }
 
         .brand-icon {
@@ -116,11 +123,22 @@
             font-weight: 500;
         }
 
+        .btn-close-sidebar {
+            display: none;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 8px;
+        }
+
         .sidebar-nav {
-            padding: 20px 12px;
+            padding: 16px 12px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 5px;
             flex: 1;
             overflow-y: auto;
         }
@@ -138,11 +156,11 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px 16px;
+            padding: 11px 14px;
             color: var(--text-muted);
             text-decoration: none;
             border-radius: 10px;
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 600;
             transition: all 0.2s ease;
             position: relative;
@@ -176,12 +194,12 @@
         }
 
         .sidebar-user {
-            padding: 16px 20px;
+            padding: 14px 18px;
             border-top: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: rgba(15, 23, 42, 0.5);
+            background: rgba(15, 23, 42, 0.6);
         }
 
         .user-info {
@@ -191,15 +209,15 @@
         }
 
         .user-avatar {
-            width: 38px;
-            height: 38px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             background: var(--primary);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 14px;
+            font-size: 13px;
             color: #fff;
         }
 
@@ -223,6 +241,23 @@
         .role-rt { background: rgba(14, 165, 233, 0.2); color: #7dd3fc; border: 1px solid rgba(14, 165, 233, 0.3); }
         .role-warga { background: rgba(245, 158, 11, 0.2); color: #fde047; border: 1px solid rgba(245, 158, 11, 0.3); }
 
+        /* Mobile Backdrop */
+        .mobile-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .mobile-backdrop.active {
+            display: block;
+            opacity: 1;
+        }
+
         /* Main Content Styling */
         .main-content {
             margin-left: 260px;
@@ -230,25 +265,53 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            width: calc(100% - 260px);
         }
 
         /* Topbar Styling */
         .topbar {
-            height: 70px;
-            background: rgba(30, 41, 59, 0.85);
-            backdrop-filter: blur(12px);
+            height: 68px;
+            background: rgba(30, 41, 59, 0.88);
+            backdrop-filter: blur(14px);
             border-bottom: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 30px;
+            padding: 0 24px;
             position: sticky;
             top: 0;
             z-index: 90;
         }
 
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-hamburger {
+            display: none;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn-hamburger:active {
+            transform: scale(0.95);
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+        }
+
         .page-title h1 {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 700;
             color: #fff;
             display: flex;
@@ -294,7 +357,7 @@
             align-items: center;
             gap: 6px;
             background: rgba(15, 23, 42, 0.85);
-            padding: 6px 12px;
+            padding: 5px 12px;
             border-radius: 30px;
             border: 1px solid var(--border-color);
         }
@@ -338,12 +401,50 @@
             transition: transform 0.2s;
         }
 
-        .btn-panic-quick:hover {
+        .btn-panic-quick:hover, .btn-panic-quick:active {
             transform: scale(1.03);
         }
 
+        /* Mobile Sub-Topbar for Quick Role Switching */
+        .mobile-role-strip {
+            display: none;
+            padding: 8px 14px;
+            background: rgba(15, 23, 42, 0.95);
+            border-bottom: 1px solid var(--border-color);
+            overflow-x: auto;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            gap: 8px;
+        }
+
+        .mobile-role-strip::-webkit-scrollbar { display: none; }
+
+        .mobile-role-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-decoration: none;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .mobile-role-pill.active {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.25);
+            color: #fff;
+        }
+
+        .mobile-role-pill:active { transform: scale(0.96); }
+
         .content-body {
-            padding: 30px;
+            padding: 24px;
             flex: 1;
         }
 
@@ -368,7 +469,7 @@
         }
 
         /* Grid Layout Utilities */
-        .grid { display: grid; gap: 24px; }
+        .grid { display: grid; gap: 20px; }
         .grid-2 { grid-template-columns: repeat(2, 1fr); }
         .grid-3 { grid-template-columns: repeat(3, 1fr); }
         .grid-4 { grid-template-columns: repeat(4, 1fr); }
@@ -378,7 +479,7 @@
             background: var(--bg-card);
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            padding: 24px;
+            padding: 22px;
             box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
             transition: transform 0.2s ease, border-color 0.2s ease;
         }
@@ -391,11 +492,11 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .card-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             color: #fff;
             display: flex;
@@ -410,9 +511,9 @@
         }
 
         .metric-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 14px;
+            width: 46px;
+            height: 46px;
+            border-radius: 13px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -421,7 +522,7 @@
         }
 
         .metric-value {
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 800;
             color: #fff;
             margin: 12px 0 4px;
@@ -436,28 +537,31 @@
         /* Modern Tables */
         .table-responsive {
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 12px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
+            min-width: 500px;
         }
 
         th {
             background: rgba(15, 23, 42, 0.6);
             color: var(--text-muted);
-            font-size: 12px;
+            font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 14px 18px;
+            padding: 12px 16px;
             font-weight: 700;
             border-bottom: 1px solid var(--border-color);
         }
 
         td {
-            padding: 16px 18px;
-            font-size: 14px;
+            padding: 14px 16px;
+            font-size: 13px;
             border-bottom: 1px solid rgba(51, 65, 85, 0.5);
             color: #e2e8f0;
         }
@@ -468,7 +572,7 @@
 
         /* Badge Status */
         .badge {
-            padding: 4px 12px;
+            padding: 4px 10px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: 700;
@@ -482,7 +586,7 @@
 
         /* Buttons & Forms */
         .btn {
-            padding: 10px 18px;
+            padding: 10px 16px;
             border-radius: 10px;
             font-size: 13px;
             font-weight: 600;
@@ -490,6 +594,7 @@
             border: none;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
             text-decoration: none;
             transition: all 0.2s ease;
@@ -520,7 +625,7 @@
 
         .form-control {
             width: 100%;
-            padding: 10px 14px;
+            padding: 11px 14px;
             background: #0f172a;
             border: 1px solid var(--border-color);
             border-radius: 10px;
@@ -532,14 +637,15 @@
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
         }
 
         /* Alert Styling */
         .alert {
             padding: 14px 18px;
             border-radius: 12px;
-            font-size: 14px;
-            margin-bottom: 24px;
+            font-size: 13.5px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -548,29 +654,161 @@
         .alert-success { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
         .alert-error { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
 
+        /* Mobile Bottom Navigation Bar (Dock) */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border-color);
+            z-index: 950;
+            align-items: center;
+            justify-content: space-around;
+            padding: 0 6px;
+            box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 6px 10px;
+            border-radius: 12px;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .bottom-nav-item i {
+            font-size: 18px;
+        }
+
+        .bottom-nav-item.active {
+            color: #818cf8;
+        }
+
+        .bottom-nav-item.active i {
+            color: #818cf8;
+            transform: scale(1.1);
+        }
+
+        .bottom-nav-item:active {
+            transform: scale(0.92);
+        }
+
+        /* Responsive Media Queries */
         @media (max-width: 1024px) {
             .grid-4, .grid-3 { grid-template-columns: repeat(2, 1fr); }
             .sidebar { width: 80px; }
             .brand-text, .nav-label, .sidebar-user .user-details { display: none; }
-            .main-content { margin-left: 80px; }
+            .main-content { margin-left: 80px; width: calc(100% - 80px); }
             .quick-role-bar { display: none; }
+            .mobile-role-strip { display: flex; }
         }
 
         @media (max-width: 768px) {
-            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; gap: 14px; }
+            
+            /* Sidebar as off-canvas drawer */
+            .sidebar {
+                width: 280px;
+                transform: translateX(-100%);
+                box-shadow: none;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.8);
+            }
+
+            .brand-text, .nav-label, .sidebar-user .user-details { display: block; }
+            .btn-close-sidebar { display: block; }
+
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .topbar {
+                height: 60px;
+                padding: 0 16px;
+            }
+
+            .btn-hamburger { display: flex; }
+
+            .page-title h1 {
+                font-size: 16px;
+            }
+
+            .iot-online-badge {
+                font-size: 10px;
+                padding: 3px 8px;
+            }
+
+            .btn-panic-quick span { display: none; }
+            .btn-panic-quick {
+                padding: 8px 12px;
+                font-size: 11px;
+                border-radius: 50%;
+                width: 36px;
+                height: 36px;
+                justify-content: center;
+            }
+
+            .mobile-role-strip { display: flex; }
+            .mobile-bottom-nav { display: flex; }
+
+            .content-body {
+                padding: 16px 14px 84px 14px; /* Bottom padding so content is not obscured by bottom dock */
+            }
+
+            .card {
+                padding: 18px 16px;
+                border-radius: 14px;
+            }
+
+            .emergency-banner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                padding: 14px 16px;
+            }
+
+            .emergency-banner a {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar Navigation -->
-    <aside class="sidebar">
+    <!-- Mobile Drawer Backdrop -->
+    <div id="mobile-backdrop" class="mobile-backdrop" onclick="toggleMobileSidebar()"></div>
+
+    <!-- Sidebar Navigation (Desktop & Mobile Drawer) -->
+    <aside id="main-sidebar" class="sidebar">
         <div class="sidebar-brand">
-            <div class="brand-icon"><i class="fa-solid fa-tower-broadcast"></i></div>
-            <div class="brand-text">
-                <h2>SIKAS-<span>RT</span></h2>
-                <p>Smart RT & IoT ESP32</p>
+            <div class="brand-header-left">
+                <div class="brand-icon"><i class="fa-solid fa-tower-broadcast"></i></div>
+                <div class="brand-text">
+                    <h2>SIKAS-<span>RT</span></h2>
+                    <p>Smart RT & IoT ESP32</p>
+                </div>
             </div>
+            <button class="btn-close-sidebar" onclick="toggleMobileSidebar()" title="Tutup Menu">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
         </div>
 
         <nav class="sidebar-nav">
@@ -588,7 +826,7 @@
                 <i class="fa-solid fa-cash-register"></i> <span>Laporan Kas RT</span>
             </a>
 
-            <div class="nav-label" style="margin-top: 12px;">Kegiatan Warga</div>
+            <div class="nav-label" style="margin-top: 10px;">Kegiatan Warga</div>
             <a href="{{ route('ronda.index') }}" class="nav-item {{ request()->routeIs('ronda.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-shield-halved" style="color: #34d399;"></i> <span>Jadwal Ronda</span>
             </a>
@@ -599,7 +837,7 @@
                 <i class="fa-solid fa-bullhorn"></i> <span>Pengumuman</span>
             </a>
 
-            <div class="nav-label" style="margin-top: 12px;">Layanan & Ekonomi</div>
+            <div class="nav-label" style="margin-top: 10px;">Layanan & Ekonomi</div>
             <a href="{{ route('surat.index') }}" class="nav-item {{ request()->routeIs('surat.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-envelope-open-text" style="color: #a78bfa;"></i> <span>Surat Pengantar</span>
             </a>
@@ -610,16 +848,16 @@
                 <i class="fa-solid fa-recycle" style="color: #2dd4bf;"></i> <span>Bank Sampah</span>
             </a>
 
-            <div class="nav-label" style="margin-top: 12px;">Akses & Portal IoT</div>
+            <div class="nav-label" style="margin-top: 10px;">Akses & Portal IoT</div>
             <a href="{{ route('ktp.index') }}" class="nav-item {{ request()->routeIs('ktp.*') ? 'active' : '' }}" style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.25);">
-                <i class="fa-solid fa-id-card" style="color: #818cf8;"></i> <span>e-KTP & Akses Portal</span>
+                <i class="fa-solid fa-id-card" style="color: #818cf8;"></i> <span>e-KTP & Portal RFID</span>
             </a>
             <a href="{{ route('iot.index') }}" class="nav-item nav-iot {{ request()->routeIs('iot.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-microchip"></i> <span>Smart IoT & ESP32</span>
             </a>
 
             @if(in_array(auth()->user()->role, ['superadmin', 'bendahara', 'rt']))
-            <div class="nav-label" style="margin-top: 12px;">Manajemen RT</div>
+            <div class="nav-label" style="margin-top: 10px;">Manajemen RT</div>
             <a href="{{ route('warga.index') }}" class="nav-item {{ request()->routeIs('warga.*') ? 'active' : '' }}">
                 <i class="fa-solid fa-users"></i> <span>Data Warga</span>
             </a>
@@ -645,39 +883,65 @@
     <main class="main-content">
         <!-- Topbar -->
         <header class="topbar">
-            <div class="page-title">
-                <h1>
-                    @yield('page_title', 'Dashboard')
-                    <span class="iot-online-badge"><span class="dot-pulse"></span> IoT Online</span>
-                </h1>
+            <div class="topbar-left">
+                <!-- Hamburger Button for Mobile -->
+                <button type="button" class="btn-hamburger" onclick="toggleMobileSidebar()" title="Buka Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+                <div class="page-title">
+                    <h1>
+                        @yield('page_title', 'Dashboard')
+                        <span class="iot-online-badge"><span class="dot-pulse"></span> IoT Online</span>
+                    </h1>
+                </div>
             </div>
 
             <div class="topbar-actions">
                 <!-- Panic Trigger Button -->
-                <button type="button" class="btn-panic-quick" onclick="openPanicModal()">
-                    <i class="fa-solid fa-triangle-exclamation"></i> Tombol Panik RT
+                <button type="button" class="btn-panic-quick" onclick="openPanicModal()" title="Tombol Darurat Panik RT">
+                    <i class="fa-solid fa-triangle-exclamation"></i> <span>Panik RT</span>
                 </button>
 
-                <!-- Demo Quick Switcher -->
+                <!-- Desktop Demo Quick Switcher -->
                 <div class="quick-role-bar">
                     <span class="quick-role-label"><i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Demo:</span>
-                    <a href="{{ route('quick-login', 'admin@kasrt.local') }}" class="btn-role-chip" style="{{ auth()->user()->role === 'superadmin' ? 'color:#fca5a5; font-weight:700;' : '' }}">Admin</a>
-                    <a href="{{ route('quick-login', 'bendahara@kasrt.local') }}" class="btn-role-chip" style="{{ auth()->user()->role === 'bendahara' ? 'color:#6ee7b7; font-weight:700;' : '' }}">Bendahara</a>
-                    <a href="{{ route('quick-login', 'rt@kasrt.local') }}" class="btn-role-chip" style="{{ auth()->user()->role === 'rt' ? 'color:#7dd3fc; font-weight:700;' : '' }}">RT</a>
-                    <a href="{{ route('quick-login', 'budi@kasrt.local') }}" class="btn-role-chip" style="{{ auth()->user()->role === 'warga' ? 'color:#fde047; font-weight:700;' : '' }}">Warga</a>
+                    <a href="{{ route('quick-login', 'admin@kasrt.local') }}" class="btn-role-chip" style="{{ auth()->user()->role === 'superadmin' ? 'color:#fca5a5; font-weight:700; background:rgba(239,68,68,0.2);' : '' }}">Admin</a>
+                    <a href="{{ route('quick-login', 'bendahara@kasrt.local') }}" class="btn-role-chip" style="{{ auth()->user()->role === 'bendahara' ? 'color:#6ee7b7; font-weight:700; background:rgba(16,185,129,0.2);' : '' }}">Bendahara</a>
+                    <a href="{{ route('quick-login', 'rt@kasrt.local') }}" class="btn-role-chip" style="{{ auth()->user()->role === 'rt' ? 'color:#7dd3fc; font-weight:700; background:rgba(14,165,233,0.2);' : '' }}">RT</a>
+                    <a href="{{ route('quick-login', 'budi@kasrt.local') }}" class="btn-role-chip" style="{{ auth()->user()->role === 'warga' ? 'color:#fde047; font-weight:700; background:rgba(245,158,11,0.2);' : '' }}">Warga</a>
                 </div>
             </div>
         </header>
+
+        <!-- Mobile Quick Role Switcher Strip (Visible on Mobile/Tablet) -->
+        <div class="mobile-role-strip">
+            <span style="font-size: 11px; font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 4px; padding-left: 2px;">
+                <i class="fa-solid fa-bolt"></i> Demo:
+            </span>
+            <a href="{{ route('quick-login', 'admin@kasrt.local') }}" class="mobile-role-pill {{ auth()->user()->role === 'superadmin' ? 'active' : '' }}">
+                <i class="fa-solid fa-user-shield" style="color: #f87171;"></i> Superadmin
+            </a>
+            <a href="{{ route('quick-login', 'bendahara@kasrt.local') }}" class="mobile-role-pill {{ auth()->user()->role === 'bendahara' ? 'active' : '' }}">
+                <i class="fa-solid fa-calculator" style="color: #34d399;"></i> Bendahara
+            </a>
+            <a href="{{ route('quick-login', 'rt@kasrt.local') }}" class="mobile-role-pill {{ auth()->user()->role === 'rt' ? 'active' : '' }}">
+                <i class="fa-solid fa-crown" style="color: #38bdf8;"></i> Ketua RT
+            </a>
+            <a href="{{ route('quick-login', 'budi@kasrt.local') }}" class="mobile-role-pill {{ auth()->user()->role === 'warga' ? 'active' : '' }}">
+                <i class="fa-solid fa-house-user" style="color: #fbbf24;"></i> Warga
+            </a>
+        </div>
 
         <!-- Body Content -->
         <div class="content-body">
             @if(session('emergency_triggered'))
                 <div class="emergency-banner">
                     <div>
-                        <strong style="font-size: 16px;"><i class="fa-solid fa-triangle-exclamation"></i> ALARM DARURAT DIAKTIFKAN!</strong>
-                        <p style="font-size: 13px; margin-top: 4px;">{{ session('emergency_triggered') }}</p>
+                        <strong style="font-size: 15px;"><i class="fa-solid fa-triangle-exclamation"></i> ALARM DARURAT DIAKTIFKAN!</strong>
+                        <p style="font-size: 12.5px; margin-top: 4px;">{{ session('emergency_triggered') }}</p>
                     </div>
-                    <a href="{{ route('iot.index') }}" class="btn btn-secondary" style="background: rgba(0,0,0,0.4); border: 1px solid #fff;">Lihat Detail IoT</a>
+                    <a href="{{ route('iot.index') }}" class="btn btn-secondary" style="background: rgba(0,0,0,0.4); border: 1px solid #fff; font-size: 12px;">Lihat Detail IoT</a>
                 </div>
             @endif
 
@@ -699,15 +963,39 @@
         </div>
     </main>
 
+    <!-- Mobile Bottom Navigation Dock -->
+    <nav class="mobile-bottom-nav">
+        <a href="{{ route('dashboard') }}" class="bottom-nav-item {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            <i class="fa-solid fa-chart-pie"></i>
+            <span>Beranda</span>
+        </a>
+        <a href="{{ route('tagihan.index') }}" class="bottom-nav-item {{ request()->routeIs('tagihan.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            <span>Tagihan</span>
+        </a>
+        <a href="{{ route('ktp.index') }}" class="bottom-nav-item {{ request()->routeIs('ktp.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-id-card"></i>
+            <span>e-KTP</span>
+        </a>
+        <a href="{{ route('iot.index') }}" class="bottom-nav-item {{ request()->routeIs('iot.*') ? 'active' : '' }}">
+            <i class="fa-solid fa-microchip"></i>
+            <span>IoT</span>
+        </a>
+        <button type="button" class="bottom-nav-item" onclick="toggleMobileSidebar()" style="background:none; border:none; cursor:pointer;">
+            <i class="fa-solid fa-bars"></i>
+            <span>Menu</span>
+        </button>
+    </nav>
+
     <!-- Modal Panic Button -->
-    <div id="modal-panic" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
-        <div style="background:#1e293b; border:2px solid #ef4444; border-radius:18px; max-width:460px; width:90%; padding:28px; box-shadow:0 25px 50px rgba(239,68,68,0.4);">
+    <div id="modal-panic" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center; padding: 16px;">
+        <div style="background:#1e293b; border:2px solid #ef4444; border-radius:18px; max-width:460px; width:100%; padding:24px; box-shadow:0 25px 50px rgba(239,68,68,0.4);">
             <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
-                <div style="width:48px; height:48px; border-radius:12px; background:#ef4444; display:flex; align-items:center; justify-content:center; color:#fff; font-size:24px;">
+                <div style="width:46px; height:46px; border-radius:12px; background:#ef4444; display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px; flex-shrink:0;">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                 </div>
                 <div>
-                    <h3 style="font-size:18px; color:#fff; font-weight:700;">Tombol Darurat Lingkungan</h3>
+                    <h3 style="font-size:17px; color:#fff; font-weight:700;">Tombol Darurat Lingkungan</h3>
                     <p style="font-size:12px; color:#94a3b8;">Kirim sinyal sirene ke ESP32 Pos Keamanan & Pengurus RT</p>
                 </div>
             </div>
@@ -729,7 +1017,7 @@
                 <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
                     <button type="button" class="btn btn-secondary" onclick="closePanicModal()">Batal</button>
                     <button type="submit" class="btn btn-danger" style="box-shadow: 0 4px 15px rgba(239, 68, 68, 0.5);">
-                        <i class="fa-solid fa-bell"></i> BUNYIKAN ALARM SEKARANG
+                        <i class="fa-solid fa-bell"></i> BUNYIKAN ALARM
                     </button>
                 </div>
             </form>
@@ -737,6 +1025,13 @@
     </div>
 
     <script>
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('main-sidebar');
+            const backdrop = document.getElementById('mobile-backdrop');
+            sidebar.classList.toggle('active');
+            backdrop.classList.toggle('active');
+        }
+
         function openPanicModal() {
             document.getElementById('modal-panic').style.display = 'flex';
         }

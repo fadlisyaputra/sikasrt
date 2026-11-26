@@ -91,6 +91,10 @@ void setup() {
   // Inisialisasi Bus SPI & RFID
   SPI.begin();
   rfid.PCD_Init();
+  delay(100);
+  rfid.PCD_SetAntennaGain(rfid.RxGain_max); // Maksimalkan jangkauan antena e-KTP
+  Serial.print("[RFID] Status Modul RC522: ");
+  rfid.PCD_DumpVersionToSerial();
 
   // Inisialisasi Layar OLED
   if (!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
@@ -131,11 +135,11 @@ void loop() {
   // 3. Cek Tap Kartu RFID Baru
   checkRfidCard();
 
-  // 4. Cek Tombol Darurat / Panic Button Fisik
-  checkPanicButton();
+  // 4. Cek Tombol Darurat / Panic Button Fisik (Aktifkan jika tombol fisik terpasang di GPIO 13)
+  // checkPanicButton();
 
-  // 5. Cek Drop Uang Fisik ke Smart Kotak Kas
-  checkKasDropSensor();
+  // 5. Cek Drop Uang Fisik ke Smart Kotak Kas (Aktifkan jika sensor terpasang di GPIO 14)
+  // checkKasDropSensor();
 
   // 6. Pengiriman Heartbeat Berkala & Penerimaan Perintah Remote
   if (millis() - lastHeartbeatTime >= HEARTBEAT_INTERVAL) {
@@ -471,6 +475,7 @@ void sendHeartbeat() {
 
   int httpCode = http.POST(req);
   if (httpCode == 200) {
+    Serial.println("[SIKAS-RT] Terhubung ke Server VPS... OK (Siap Membaca Tap Kartu)");
     String res = http.getString();
     StaticJsonDocument<512> resDoc;
     deserializeJson(resDoc, res);
