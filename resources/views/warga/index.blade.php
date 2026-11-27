@@ -50,7 +50,7 @@
                     <th>Status Rumah</th>
                     <th>Kartu RFID IoT</th>
                     <th>Wilayah</th>
-                    @if(in_array(auth()->user()->role, ['superadmin', 'bendahara']))
+                    @if(in_array(auth()->user()->role, ['superadmin', 'bendahara', 'rt']))
                     <th>Aksi</th>
                     @endif
                 </tr>
@@ -80,14 +80,14 @@
                                 <span style="font-family: monospace; font-size: 11px; color: #38bdf8; background: rgba(6,182,212,0.15); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(6,182,212,0.3);">
                                     <i class="fa-solid fa-id-card"></i> {{ $u->rfid_uid }}
                                 </span>
-                                @if(in_array(auth()->user()->role, ['superadmin', 'bendahara']))
+                                @if(in_array(auth()->user()->role, ['superadmin', 'bendahara', 'rt']))
                                 <button type="button" onclick="openDirectPairModal({{ $u->id }}, '{{ addslashes($u->name) }}', '{{ $u->rfid_uid }}')" class="btn btn-secondary" style="padding: 3px 7px; font-size: 10px;" title="Ganti / Scan Ulang e-KTP">
                                     <i class="fa-solid fa-arrows-rotate"></i>
                                 </button>
                                 @endif
                             </div>
                         @else
-                            @if(in_array(auth()->user()->role, ['superadmin', 'bendahara']))
+                            @if(in_array(auth()->user()->role, ['superadmin', 'bendahara', 'rt']))
                             <button type="button" onclick="openDirectPairModal({{ $u->id }}, '{{ addslashes($u->name) }}', '')" class="btn btn-primary" style="padding: 4px 10px; font-size: 11px; background: linear-gradient(135deg, #06b6d4, #3b82f6); border: none; font-weight: 700;">
                                 <i class="fa-solid fa-wifi"></i> Rekam e-KTP
                             </button>
@@ -97,19 +97,30 @@
                         @endif
                     </td>
                     <td>{{ $u->rt_rw }}</td>
-                    @if(in_array(auth()->user()->role, ['superadmin', 'bendahara']))
+                    @if(in_array(auth()->user()->role, ['superadmin', 'bendahara', 'rt']))
                     <td>
-                        <div style="display: flex; gap: 6px;">
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <button type="button" onclick="openEditUserModal({{ json_encode([
+                                'id' => $u->id,
+                                'name' => $u->name,
+                                'email' => $u->email,
+                                'role' => $u->role,
+                                'phone' => $u->phone,
+                                'address' => $u->address,
+                                'rt_rw' => $u->rt_rw,
+                                'status_warga' => $u->status_warga,
+                                'rfid_uid' => $u->rfid_uid
+                            ]) }})" class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" title="Edit Data Pengguna">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit
+                            </button>
                             @if(auth()->user()->role === 'superadmin' && $u->id !== auth()->id())
-                            <form action="{{ route('warga.destroy', $u->id) }}" method="POST" onsubmit="return confirm('Hapus pengguna {{ $u->name }}?');">
+                            <form action="{{ route('warga.destroy', $u->id) }}" method="POST" onsubmit="return confirm('Hapus pengguna {{ $u->name }}?');" style="margin: 0;">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;">
-                                    <i class="fa-solid fa-trash"></i> Hapus
+                                <button type="submit" class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" title="Hapus">
+                                    <i class="fa-solid fa-trash"></i>
                                 </button>
                             </form>
-                            @else
-                            <small style="color: var(--text-muted);">-</small>
                             @endif
                         </div>
                     </td>
@@ -173,15 +184,30 @@
                 </div>
             </div>
 
-            @if(auth()->user()->role === 'superadmin' && $u->id !== auth()->id())
-            <div style="display: flex; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
+            @if(in_array(auth()->user()->role, ['superadmin', 'bendahara', 'rt']))
+            <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
+                <button type="button" onclick="openEditUserModal({{ json_encode([
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'role' => $u->role,
+                    'phone' => $u->phone,
+                    'address' => $u->address,
+                    'rt_rw' => $u->rt_rw,
+                    'status_warga' => $u->status_warga,
+                    'rfid_uid' => $u->rfid_uid
+                ]) }})" class="btn btn-secondary" style="padding: 6px 12px; font-size: 11.5px;">
+                    <i class="fa-solid fa-pen-to-square"></i> Edit Data
+                </button>
+                @if(auth()->user()->role === 'superadmin' && $u->id !== auth()->id())
                 <form action="{{ route('warga.destroy', $u->id) }}" method="POST" onsubmit="return confirm('Hapus pengguna {{ $u->name }}?');" style="margin: 0;">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-danger" style="padding: 6px 14px; font-size: 11.5px;">
-                        <i class="fa-solid fa-trash"></i> Hapus Pengguna
+                    <button type="submit" class="btn btn-danger" style="padding: 6px 12px; font-size: 11.5px;">
+                        <i class="fa-solid fa-trash"></i> Hapus
                     </button>
                 </form>
+                @endif
             </div>
             @endif
         </div>
@@ -325,6 +351,90 @@
                 <button type="button" onclick="closeTambahWargaModal()" class="btn btn-secondary">Batal</button>
                 <button type="submit" class="btn btn-primary" style="font-weight: 700;">
                     <i class="fa-solid fa-check"></i> Simpan Data Warga
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Edit Data Warga & Akun -->
+<div id="modal-edit-user" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 99999; align-items:center; justify-content:center; padding: 16px; overflow-y: auto;">
+    <div class="card" style="width: 100%; max-width: 580px; margin: auto; max-height: 92vh; overflow-y: auto;">
+        <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+            <div class="card-title">
+                <i class="fa-solid fa-user-pen" style="color: #38bdf8;"></i>
+                <span>Edit Data Warga & Pengguna</span>
+            </div>
+            <button type="button" onclick="closeEditUserModal()" class="btn btn-secondary" style="padding: 4px 8px; font-size: 16px;">&times;</button>
+        </div>
+
+        <form id="formEditUser" action="" method="POST" style="margin-top: 14px;">
+            @csrf
+            @method('PUT')
+            
+            <div class="form-group">
+                <label>Nama Lengkap Warga</label>
+                <input type="text" id="edit_user_name" name="name" class="form-control" required>
+            </div>
+
+            <div class="grid grid-2" style="gap: 12px;">
+                <div class="form-group">
+                    <label>Email (Username Login)</label>
+                    <input type="email" id="edit_user_email" name="email" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Kata Sandi Baru (Opsional)</label>
+                    <input type="password" name="password" class="form-control" placeholder="Kosongkan jika tak diubah">
+                </div>
+            </div>
+
+            <div class="grid grid-2" style="gap: 12px;">
+                <div class="form-group">
+                    <label>Role Otoritas</label>
+                    <select id="edit_user_role" name="role" class="form-control" required>
+                        <option value="warga">Warga</option>
+                        <option value="rt">Ketua RT</option>
+                        <option value="bendahara">Bendahara</option>
+                        @if(auth()->user()->role === 'superadmin')
+                        <option value="superadmin">Superadmin</option>
+                        @endif
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>No. HP / WhatsApp</label>
+                    <input type="text" id="edit_user_phone" name="phone" class="form-control">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Alamat Lengkap Rumah</label>
+                <input type="text" id="edit_user_address" name="address" class="form-control">
+            </div>
+
+            <div class="grid grid-2" style="gap: 12px;">
+                <div class="form-group">
+                    <label>Wilayah RT / RW</label>
+                    <input type="text" id="edit_user_rt_rw" name="rt_rw" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Status Kepemilikan Rumah</label>
+                    <select id="edit_user_status_warga" name="status_warga" class="form-control" required>
+                        <option value="tetap">Warga Tetap</option>
+                        <option value="kontrak">Warga Kontrak / Kos</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 6px;">
+                <label>UID e-KTP / Kartu RFID</label>
+                <input type="text" id="edit_user_rfid_uid" name="rfid_uid" class="form-control" placeholder="Contoh: 93:B4:72:A1" style="font-family: monospace;">
+                <small style="color: var(--text-muted); font-size: 11px;">Bisa dikosongkan jika ingin mencabut kartu dari akun ini.</small>
+            </div>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button type="button" onclick="closeEditUserModal()" class="btn btn-secondary">Batal</button>
+                <button type="submit" class="btn btn-primary" style="font-weight: 700;">
+                    <i class="fa-solid fa-save"></i> Simpan Perubahan
                 </button>
             </div>
         </form>
@@ -690,11 +800,39 @@
         }
     }
 
+    // 6. MODAL EDIT WARGA
+    function openEditUserModal(user) {
+        document.getElementById('formEditUser').action = '/warga/' + user.id + '/update';
+        document.getElementById('edit_user_name').value = user.name || '';
+        document.getElementById('edit_user_email').value = user.email || '';
+        document.getElementById('edit_user_role').value = user.role || 'warga';
+        document.getElementById('edit_user_phone').value = user.phone || '';
+        document.getElementById('edit_user_address').value = user.address || '';
+        document.getElementById('edit_user_rt_rw').value = user.rt_rw || 'RT 01 / RW 05';
+        document.getElementById('edit_user_status_warga').value = user.status_warga || 'tetap';
+        document.getElementById('edit_user_rfid_uid').value = user.rfid_uid || '';
+
+        const modal = document.getElementById('modal-edit-user');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.getElementById('edit_user_name').focus();
+        }
+    }
+
+    function closeEditUserModal() {
+        const modal = document.getElementById('modal-edit-user');
+        if (modal) modal.style.display = 'none';
+    }
+
     // Tutup modal jika user klik di luar card (backdrop click)
     window.addEventListener('click', function(e) {
         const modalTambah = document.getElementById('modal-tambah-user');
         if (modalTambah && e.target === modalTambah) {
             closeTambahWargaModal();
+        }
+        const modalEdit = document.getElementById('modal-edit-user');
+        if (modalEdit && e.target === modalEdit) {
+            closeEditUserModal();
         }
         const modalPair = document.getElementById('modal-direct-pair');
         if (modalPair && e.target === modalPair) {

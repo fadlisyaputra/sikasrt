@@ -108,6 +108,10 @@ class WargaController extends Controller
     {
         $user = User::findOrFail($id);
 
+        if (!$request->has('status_warga') && $request->has('status_rumah')) {
+            $request->merge(['status_warga' => $request->status_rumah]);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,

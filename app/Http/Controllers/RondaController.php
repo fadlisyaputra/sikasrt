@@ -128,6 +128,7 @@ class RondaController extends Controller
         $schedule = RondaSchedule::findOrFail($id);
 
         $request->validate([
+            'day_name' => 'required|in:Senin,Selasa,Rabu,Kamis,Jumat,Sabtu,Minggu',
             'group_name' => 'required|string|max:100',
             'start_time' => 'required|string',
             'end_time' => 'required|string',
@@ -136,9 +137,18 @@ class RondaController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $schedule->update($request->only('group_name', 'start_time', 'end_time', 'location', 'coordinator_id', 'notes'));
+        $schedule->update($request->only('day_name', 'group_name', 'start_time', 'end_time', 'location', 'coordinator_id', 'notes'));
 
-        return redirect()->back()->with('success', 'Jadwal Ronda berhasil diperbarui.');
+        if ($request->filled('coordinator_id')) {
+            RondaMember::firstOrCreate([
+                'ronda_schedule_id' => $schedule->id,
+                'user_id' => $request->coordinator_id,
+            ], [
+                'role_in_team' => 'Koordinator',
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Jadwal Ronda (' . $schedule->day_name . ' - ' . $schedule->group_name . ') berhasil diperbarui.');
     }
 
     /**

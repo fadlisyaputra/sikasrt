@@ -235,6 +235,35 @@ class TagihanController extends Controller
     }
 
     /**
+     * Update / Edit Data Tagihan Warga (Bendahara / RT / Superadmin)
+     */
+    public function update(Request $request, $id)
+    {
+        $bill = WargaBill::findOrFail($id);
+
+        $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'due_date' => 'required|date',
+            'period_month' => 'required|integer|between:1,12',
+            'period_year' => 'required|integer|min:2020',
+            'status' => 'required|in:unpaid,pending,paid,cancelled',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $data = $request->only('amount', 'due_date', 'period_month', 'period_year', 'status', 'notes');
+
+        if ($request->status === 'paid' && !$bill->paid_at) {
+            $data['paid_at'] = Carbon::now();
+        } elseif ($request->status !== 'paid') {
+            $data['paid_at'] = null;
+        }
+
+        $bill->update($data);
+
+        return redirect()->back()->with('success', 'Data tagihan [' . $bill->bill_code . '] berhasil diperbarui.');
+    }
+
+    /**
      * Warga Membayar Tagihannya Sendiri (Upload Bukti Transfer atau Titip Tunai)
      */
     public function payBill(Request $request, $id)

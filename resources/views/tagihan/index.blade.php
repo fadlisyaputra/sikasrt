@@ -183,11 +183,29 @@
                             @endif
                         </td>
                         <td style="padding: 10px 8px; text-align: center;">
-                            <div style="display: flex; justify-content: center; gap: 6px;">
+                            <div style="display: flex; justify-content: center; gap: 6px; align-items: center;">
                                 <!-- Tombol Cetak / Lihat Kuitansi Invoice -->
-                                <a href="{{ route('tagihan.invoice', $bill->id) }}" target="_blank" class="btn btn-secondary" style="padding: 4px 10px; font-size: 11px;" title="Cetak Kuitansi / Invoice">
+                                <a href="{{ route('tagihan.invoice', $bill->id) }}" target="_blank" class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" title="Cetak Kuitansi / Invoice">
                                     <i class="fa-solid fa-print"></i> Kuitansi
                                 </a>
+
+                                <!-- Tombol Edit untuk Pengurus RT / Bendahara / Superadmin -->
+                                @if(in_array(auth()->user()->role, ['superadmin', 'bendahara', 'rt']))
+                                <button type="button" onclick="openEditTagihanModal({{ json_encode([
+                                    'id' => $bill->id,
+                                    'bill_code' => $bill->bill_code,
+                                    'user_name' => $bill->user->name,
+                                    'iuran_name' => $bill->iuranType->name,
+                                    'amount' => (int)$bill->amount,
+                                    'period_month' => $bill->period_month,
+                                    'period_year' => $bill->period_year,
+                                    'due_date' => $bill->due_date ? \Carbon\Carbon::parse($bill->due_date)->format('Y-m-d') : '',
+                                    'status' => $bill->status,
+                                    'notes' => $bill->notes ?? ''
+                                ]) }})" class="btn btn-secondary" style="padding: 4px 8px; font-size: 11px;" title="Edit Data Tagihan">
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit
+                                </button>
+                                @endif
 
                                 <!-- Tombol Bayar untuk Warga -->
                                 @if(auth()->user()->isWarga() && $bill->status === 'unpaid')
@@ -198,7 +216,7 @@
 
                                 <!-- Tombol Tandai Lunas untuk Bendahara / RT -->
                                 @if(in_array(auth()->user()->role, ['superadmin', 'bendahara', 'rt']) && $bill->status !== 'paid')
-                                <button type="button" onclick="openMarkPaidModal({{ $bill->id }}, '{{ $bill->bill_code }}', '{{ $bill->user->name }}', {{ $bill->amount }})" class="btn btn-primary" style="padding: 4px 10px; font-size: 11px;" title="Konfirmasi Pembayaran">
+                                <button type="button" onclick="openMarkPaidModal({{ $bill->id }}, '{{ $bill->bill_code }}', '{{ $bill->user->name }}', {{ $bill->amount }})" class="btn btn-primary" style="padding: 4px 8px; font-size: 11px;" title="Konfirmasi Pembayaran">
                                     <i class="fa-solid fa-check-double"></i> Tandai Lunas
                                 </button>
                                 @endif
@@ -266,19 +284,36 @@
                 </div>
 
                 <!-- Action Buttons: Touch Friendly & Full Width -->
-                <div style="display: flex; gap: 8px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
-                    <a href="{{ route('tagihan.invoice', $bill->id) }}" target="_blank" class="btn btn-secondary" style="flex: 1; padding: 8px 10px; font-size: 12px; justify-content: center;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+                    <a href="{{ route('tagihan.invoice', $bill->id) }}" target="_blank" class="btn btn-secondary" style="flex: 1 1 auto; padding: 8px 10px; font-size: 12px; justify-content: center;">
                         <i class="fa-solid fa-print"></i> Kuitansi
                     </a>
 
+                    @if(in_array(auth()->user()->role, ['superadmin', 'bendahara', 'rt']))
+                    <button type="button" onclick="openEditTagihanModal({{ json_encode([
+                        'id' => $bill->id,
+                        'bill_code' => $bill->bill_code,
+                        'user_name' => $bill->user->name,
+                        'iuran_name' => $bill->iuranType->name,
+                        'amount' => (int)$bill->amount,
+                        'period_month' => $bill->period_month,
+                        'period_year' => $bill->period_year,
+                        'due_date' => $bill->due_date ? \Carbon\Carbon::parse($bill->due_date)->format('Y-m-d') : '',
+                        'status' => $bill->status,
+                        'notes' => $bill->notes ?? ''
+                    ]) }})" class="btn btn-secondary" style="flex: 1 1 auto; padding: 8px 10px; font-size: 12px; justify-content: center;">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                    </button>
+                    @endif
+
                     @if(auth()->user()->isWarga() && $bill->status === 'unpaid')
-                    <button type="button" onclick="openBayarModal({{ $bill->id }}, '{{ $bill->bill_code }}', '{{ $bill->iuranType->name }}', {{ $bill->amount }})" class="btn btn-success" style="flex: 1.2; padding: 8px 10px; font-size: 12px; justify-content: center;">
-                        <i class="fa-solid fa-wallet"></i> Bayar Sekarang
+                    <button type="button" onclick="openBayarModal({{ $bill->id }}, '{{ $bill->bill_code }}', '{{ $bill->iuranType->name }}', {{ $bill->amount }})" class="btn btn-success" style="flex: 1.2 1 auto; padding: 8px 10px; font-size: 12px; justify-content: center;">
+                        <i class="fa-solid fa-wallet"></i> Bayar
                     </button>
                     @endif
 
                     @if(in_array(auth()->user()->role, ['superadmin', 'bendahara', 'rt']) && $bill->status !== 'paid')
-                    <button type="button" onclick="openMarkPaidModal({{ $bill->id }}, '{{ $bill->bill_code }}', '{{ $bill->user->name }}', {{ $bill->amount }})" class="btn btn-primary" style="flex: 1.4; padding: 8px 10px; font-size: 12px; justify-content: center;">
+                    <button type="button" onclick="openMarkPaidModal({{ $bill->id }}, '{{ $bill->bill_code }}', '{{ $bill->user->name }}', {{ $bill->amount }})" class="btn btn-primary" style="flex: 1.4 1 auto; padding: 8px 10px; font-size: 12px; justify-content: center;">
                         <i class="fa-solid fa-check-double"></i> Tandai Lunas
                     </button>
                     @endif
@@ -468,6 +503,79 @@
     </div>
 </div>
 
+<!-- Modal Edit Data Tagihan (Superadmin / Bendahara / RT) -->
+<div id="modalEditTagihan" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 99999; padding: 20px; overflow-y: auto;">
+    <div style="max-width: 520px; margin: 50px auto; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(245, 158, 11, 0.15); display: flex; align-items: center; justify-content: center; color: var(--secondary);">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </div>
+                <div>
+                    <h3 id="editBillTitle" style="font-size: 17px; font-weight: 800; color: #fff; margin: 0;">Edit Data Tagihan</h3>
+                    <p id="editBillSubtitle" style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;"></p>
+                </div>
+            </div>
+            <button type="button" onclick="closeEditTagihanModal()" style="background: none; border: none; color: #fff; font-size: 22px; cursor: pointer;">&times;</button>
+        </div>
+
+        <form id="formEditTagihan" action="" method="POST">
+            @csrf
+            @method('PUT')
+
+            <div class="form-group">
+                <label>Nominal Tagihan (Rp)</label>
+                <input type="number" name="amount" id="edit_tagihan_amount" class="form-control" required min="1">
+            </div>
+
+            <div class="grid grid-2" style="gap: 12px;">
+                <div class="form-group">
+                    <label>Bulan Periode</label>
+                    <select name="period_month" id="edit_tagihan_month" class="form-control" required>
+                        @for($m = 1; $m <= 12; $m++)
+                            <option value="{{ $m }}">
+                                {{ DateTime::createFromFormat('!m', $m)->format('F') }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tahun Periode</label>
+                    <input type="number" name="period_year" id="edit_tagihan_year" class="form-control" required min="2020">
+                </div>
+            </div>
+
+            <div class="grid grid-2" style="gap: 12px;">
+                <div class="form-group">
+                    <label>Batas Jatuh Tempo</label>
+                    <input type="date" name="due_date" id="edit_tagihan_due_date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Status Pembayaran</label>
+                    <select name="status" id="edit_tagihan_status" class="form-control" required>
+                        <option value="unpaid">Belum Lunas (Unpaid)</option>
+                        <option value="pending">Menunggu Verifikasi (Pending)</option>
+                        <option value="paid">Lunas (Paid)</option>
+                        <option value="cancelled">Dibatalkan (Cancelled)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Catatan / Keterangan Tagihan</label>
+                <textarea name="notes" id="edit_tagihan_notes" class="form-control" rows="2" placeholder="Catatan tagihan..."></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+                <button type="button" onclick="closeEditTagihanModal()" class="btn btn-secondary">Batal</button>
+                <button type="submit" class="btn btn-primary" style="font-weight: 700;">
+                    <i class="fa-solid fa-save"></i> Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- Modal Bayar Tagihan (Warga) -->
 <div id="modalBayarTagihan" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 99999; padding: 20px; overflow-y: auto;">
     <div style="max-width: 480px; margin: 60px auto; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); padding: 24px;">
@@ -564,9 +672,28 @@
         if (m) m.style.display = 'none';
     }
 
+    function openEditTagihanModal(bill) {
+        document.getElementById('editBillTitle').innerText = 'Edit Tagihan: ' + bill.bill_code;
+        document.getElementById('editBillSubtitle').innerText = bill.user_name + ' • ' + bill.iuran_name;
+        document.getElementById('formEditTagihan').action = '/tagihan/' + bill.id;
+        document.getElementById('edit_tagihan_amount').value = bill.amount;
+        document.getElementById('edit_tagihan_month').value = bill.period_month;
+        document.getElementById('edit_tagihan_year').value = bill.period_year;
+        document.getElementById('edit_tagihan_due_date').value = bill.due_date;
+        document.getElementById('edit_tagihan_status').value = bill.status;
+        document.getElementById('edit_tagihan_notes').value = bill.notes || '';
+        const m = document.getElementById('modalEditTagihan');
+        if (m) m.style.display = 'block';
+    }
+
+    function closeEditTagihanModal() {
+        const m = document.getElementById('modalEditTagihan');
+        if (m) m.style.display = 'none';
+    }
+
     // Backdrop click listener to close whichever modal is clicked outside
     window.addEventListener('click', function(e) {
-        const modals = ['modalGenerate', 'modalTambahTagihan', 'modalMarkPaid', 'modalBayarTagihan'];
+        const modals = ['modalGenerate', 'modalTambahTagihan', 'modalMarkPaid', 'modalEditTagihan', 'modalBayarTagihan'];
         modals.forEach(id => {
             const el = document.getElementById(id);
             if (el && e.target === el) {

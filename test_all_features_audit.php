@@ -109,6 +109,20 @@ assertAudit("Tambah Tagihan Manual 1 Warga via store()", $resStoreBill->getStatu
 $testBill = WargaBill::where('user_id', $wargaBudi->id)->where('period_year', 2027)->first();
 assertAudit("Tagihan tersimpan di database", $testBill !== null);
 
+// 3.2b Edit Tagihan Warga via update()
+$reqUpdateBill = Request::create('/tagihan/' . $testBill->id, 'PUT', [
+    'amount' => 75000,
+    'period_month' => 2,
+    'period_year' => 2027,
+    'due_date' => '2027-02-28',
+    'status' => 'unpaid',
+    'notes' => 'Tagihan telah diedit oleh pengurus RT',
+]);
+$reqUpdateBill->setLaravelSession($session);
+$resUpdateBill = $tagihanCtrl->update($reqUpdateBill, $testBill->id);
+$testBill->refresh();
+assertAudit("Edit Tagihan Warga via update() (Nominal -> 75000, Bulan -> 2)", (int)$testBill->amount === 75000 && (int)$testBill->period_month === 2 && $testBill->notes === 'Tagihan telah diedit oleh pengurus RT');
+
 // 3.3 Cetak / Tampilkan Invoice Tagihan
 $resInvoice = $tagihanCtrl->invoice($testBill->id);
 assertAudit("Render Kuitansi/Invoice Tagihan", $resInvoice && $resInvoice->name() === 'tagihan.invoice');
@@ -177,6 +191,25 @@ $reqCheckUid = Request::create('/warga/check-uid', 'POST', ['rfid_uid' => '12:34
 $resCheckUid = $wargaCtrl->checkUidAvailability($reqCheckUid);
 $dataCheckUid = json_decode($resCheckUid->getContent(), true);
 assertAudit("API Validasi Duplikasi UID Warga", ($dataCheckUid['available'] ?? false) === true);
+
+// Edit Data Warga via update()
+$originalAddress = $wargaBudi->address;
+$reqUpdateWarga = Request::create("/warga/{$wargaBudi->id}/update", 'POST', [
+    'name' => $wargaBudi->name,
+    'email' => $wargaBudi->email,
+    'role' => $wargaBudi->role,
+    'phone' => '081555666777',
+    'address' => 'Blok C1 No. 12 (Renovasi Baru)',
+    'rt_rw' => 'RT 01 / RW 05',
+    'status_warga' => 'tetap',
+    'rfid_uid' => '93:B4:72:A1',
+]);
+$reqUpdateWarga->setLaravelSession($session);
+$resUpdateWarga = $wargaCtrl->update($reqUpdateWarga, $wargaBudi->id);
+$wargaBudi->refresh();
+assertAudit("Edit Data Warga via update()", $wargaBudi->address === 'Blok C1 No. 12 (Renovasi Baru)');
+// Kembalikan alamat semula
+$wargaBudi->update(['address' => $originalAddress]);
 
 // Direct Pairing e-KTP ke Warga Budi
 $newUidBudi = 'AA:BB:CC:DD';
@@ -249,6 +282,47 @@ assertAudit("Ketua RT menyetujui surat pengantar", $createdSurat->status === 'ap
 // Cetak Surat
 $resPrint = $suratCtrl->print($createdSurat->id);
 assertAudit("Render Cetak Surat Pengantar Resmi RT", $resPrint && $resPrint->name() === 'surat.print');
+
+// -------------------------------------------------------------
+// 7b. MODUL JADWAL RONDA & EDIT JADWAL
+// -------------------------------------------------------------
+echo "\n--- 7b. AUDIT JADWAL RONDA & EDIT JADWAL ---\n";
+Auth::login($admin);
+$rondaCtrl = app(\App\Http\Controllers\RondaController::class);
+
+$reqStoreJadwal = Request::create('/ronda/jadwal', 'POST', [
+    'day_name' => 'Senin',
+    'group_name' => 'Regu Uji Coba Alpha',
+    'start_time' => '23:00',
+    'end_time' => '04:00',
+    'location' => 'Pos Ronda Uji Coba',
+    'coordinator_id' => $wargaBudi->id,
+    'notes' => 'Catatan uji coba',
+]);
+$reqStoreJadwal->setLaravelSession($session);
+$resStoreJadwal = $rondaCtrl->storeSchedule($reqStoreJadwal);
+$testSched = \App\Models\RondaSchedule::where('group_name', 'Regu Uji Coba Alpha')->first();
+assertAudit("Tambah Jadwal Ronda Baru", $testSched !== null);
+
+if ($testSched) {
+    $reqUpdateSched = Request::create('/ronda/jadwal/' . $testSched->id, 'PUT', [
+        'day_name' => 'Selasa',
+        'group_name' => 'Regu Uji Coba Bravo',
+        'start_time' => '22:00',
+        'end_time' => '05:00',
+        'location' => 'Pos Ronda Selatan',
+        'coordinator_id' => $wargaBudi->id,
+        'notes' => 'Catatan setelah edit',
+    ]);
+    $reqUpdateSched->setLaravelSession($session);
+    $resUpdateSched = $rondaCtrl->updateSchedule($reqUpdateSched, $testSched->id);
+    $testSched->refresh();
+    assertAudit("Edit Jadwal Ronda via updateSchedule() (Hari -> Selasa, Regu -> Bravo)", $testSched->day_name === 'Selasa' && $testSched->group_name === 'Regu Uji Coba Bravo' && $testSched->location === 'Pos Ronda Selatan');
+    
+    // Hapus Jadwal Uji Coba
+    $rondaCtrl->destroySchedule($testSched->id);
+    assertAudit("Hapus Jadwal Ronda Uji Coba", \App\Models\RondaSchedule::find($testSched->id) === null);
+}
 
 // -------------------------------------------------------------
 // 8. AUDIT RENDERING SELURUH HALAMAN WEB UTAMA

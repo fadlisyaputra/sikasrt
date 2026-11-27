@@ -174,6 +174,18 @@
 
                 @if(in_array(auth()->user()->role, ['superadmin', 'bendahara', 'rt']))
                 <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; border-top: 1px solid var(--border-color); padding-top: 10px;">
+                    <button type="button" onclick="openEditJadwalModal({{ json_encode([
+                        'id' => $sched->id,
+                        'day_name' => $sched->day_name,
+                        'group_name' => $sched->group_name,
+                        'start_time' => $sched->start_time,
+                        'end_time' => $sched->end_time,
+                        'location' => $sched->location,
+                        'coordinator_id' => $sched->coordinator_id,
+                        'notes' => $sched->notes ?? ''
+                    ]) }})" class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit
+                    </button>
                     <form action="{{ route('ronda.schedule.destroy', $sched->id) }}" method="POST" onsubmit="return confirm('Hapus jadwal ini?')" style="margin: 0;">
                         @csrf
                         @method('DELETE')
@@ -260,11 +272,16 @@
 </div>
 
 <!-- Modal Tambah Jadwal Regu (Admin/RT) -->
-<div id="modalTambahJadwal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 999; padding: 20px; overflow-y: auto;">
+<div id="modalTambahJadwal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 99999; padding: 20px; overflow-y: auto;">
     <div style="max-width: 500px; margin: 50px auto; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); padding: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-            <h3 style="font-size: 18px; font-weight: 800; color: #fff;">Tambah Jadwal Regu Ronda</h3>
-            <button type="button" onclick="document.getElementById('modalTambahJadwal').style.display='none'" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+                <h3 style="font-size: 18px; font-weight: 800; color: #fff; margin: 0;">Tambah Jadwal Regu Ronda</h3>
+            </div>
+            <button type="button" onclick="closeTambahJadwalModal()" style="background: none; border: none; color: #fff; font-size: 22px; cursor: pointer;">&times;</button>
         </div>
 
         <form action="{{ route('ronda.schedule.store') }}" method="POST">
@@ -313,19 +330,91 @@
                 <textarea name="notes" class="form-control" rows="2" placeholder="Instruksi rute patroli, pengecekan portal..."></textarea>
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
-                <button type="button" onclick="document.getElementById('modalTambahJadwal').style.display='none'" class="btn btn-secondary">Batal</button>
-                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Simpan Jadwal</button>
+                <button type="button" onclick="closeTambahJadwalModal()" class="btn btn-secondary">Batal</button>
+                <button type="submit" class="btn btn-primary" style="font-weight: 700;"><i class="fa-solid fa-save"></i> Simpan Jadwal</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Edit Jadwal Regu (Admin/RT) -->
+<div id="modalEditJadwal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 99999; padding: 20px; overflow-y: auto;">
+    <div style="max-width: 500px; margin: 50px auto; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(245, 158, 11, 0.15); display: flex; align-items: center; justify-content: center; color: var(--secondary);">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </div>
+                <div>
+                    <h3 id="editScheduleTitle" style="font-size: 17px; font-weight: 800; color: #fff; margin: 0;">Edit Jadwal Ronda</h3>
+                    <p style="font-size: 12px; color: var(--text-muted); margin: 2px 0 0 0;">Perbarui hari, regu, jam, atau koordinator</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeEditJadwalModal()" style="background: none; border: none; color: #fff; font-size: 22px; cursor: pointer;">&times;</button>
+        </div>
+
+        <form id="formEditJadwal" action="" method="POST">
+            @csrf
+            @method('PUT')
+            <div class="form-group">
+                <label>Pilih Hari</label>
+                <select name="day_name" id="edit_sched_day_name" class="form-control" required>
+                    <option value="Senin">Senin</option>
+                    <option value="Selasa">Selasa</option>
+                    <option value="Rabu">Rabu</option>
+                    <option value="Kamis">Kamis</option>
+                    <option value="Jumat">Jumat</option>
+                    <option value="Sabtu">Sabtu</option>
+                    <option value="Minggu">Minggu</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Nama Regu</label>
+                <input type="text" name="group_name" id="edit_sched_group_name" class="form-control" placeholder="Contoh: Regu 1 (Garuda)" required>
+            </div>
+            <div class="grid grid-2" style="gap: 12px;">
+                <div class="form-group">
+                    <label>Jam Mulai</label>
+                    <input type="text" name="start_time" id="edit_sched_start_time" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Jam Selesai</label>
+                    <input type="text" name="end_time" id="edit_sched_end_time" class="form-control" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Pos / Lokasi Pos Ronda</label>
+                <input type="text" name="location" id="edit_sched_location" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Penanggung Jawab / Koordinator</label>
+                <select name="coordinator_id" id="edit_sched_coordinator_id" class="form-control">
+                    <option value="">-- Pilih Warga / Koordinator --</option>
+                    @foreach($wargaList as $w)
+                    <option value="{{ $w->id }}">{{ $w->name }} ({{ $w->address ?? 'Warga' }})</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Catatan / Instruksi Khusus (Opsional)</label>
+                <textarea name="notes" id="edit_sched_notes" class="form-control" rows="2" placeholder="Instruksi rute patroli, pengecekan portal..."></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+                <button type="button" onclick="closeEditJadwalModal()" class="btn btn-secondary">Batal</button>
+                <button type="submit" class="btn btn-primary" style="font-weight: 700;">
+                    <i class="fa-solid fa-save"></i> Simpan Perubahan
+                </button>
             </div>
         </form>
     </div>
 </div>
 
 <!-- Modal Tambah Anggota ke Jadwal (Admin/RT) -->
-<div id="modalTambahAnggota" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 999; padding: 20px;">
+<div id="modalTambahAnggota" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 99999; padding: 20px;">
     <div style="max-width: 440px; margin: 80px auto; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); padding: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <h3 style="font-size: 16px; font-weight: 800; color: #fff;">Tambah Anggota Warga</h3>
-            <button type="button" onclick="document.getElementById('modalTambahAnggota').style.display='none'" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+            <button type="button" onclick="closeTambahAnggotaModal()" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
         </div>
         <p id="labelScheduleTarget" style="font-size: 13px; color: var(--secondary); margin-bottom: 14px; font-weight: 600;"></p>
 
@@ -347,7 +436,7 @@
                 </select>
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
-                <button type="button" onclick="document.getElementById('modalTambahAnggota').style.display='none'" class="btn btn-secondary">Batal</button>
+                <button type="button" onclick="closeTambahAnggotaModal()" class="btn btn-secondary">Batal</button>
                 <button type="submit" class="btn btn-success"><i class="fa-solid fa-plus"></i> Tambahkan</button>
             </div>
         </form>
@@ -355,10 +444,56 @@
 </div>
 
 <script>
+    function openTambahJadwalModal() {
+        const m = document.getElementById('modalTambahJadwal');
+        if (m) m.style.display = 'block';
+    }
+
+    function closeTambahJadwalModal() {
+        const m = document.getElementById('modalTambahJadwal');
+        if (m) m.style.display = 'none';
+    }
+
+    function openEditJadwalModal(sched) {
+        document.getElementById('editScheduleTitle').innerText = 'Edit Jadwal: ' + sched.day_name + ' - ' + sched.group_name;
+        document.getElementById('formEditJadwal').action = '/ronda/jadwal/' + sched.id;
+        document.getElementById('edit_sched_day_name').value = sched.day_name;
+        document.getElementById('edit_sched_group_name').value = sched.group_name;
+        document.getElementById('edit_sched_start_time').value = sched.start_time;
+        document.getElementById('edit_sched_end_time').value = sched.end_time;
+        document.getElementById('edit_sched_location').value = sched.location;
+        document.getElementById('edit_sched_coordinator_id').value = sched.coordinator_id || '';
+        document.getElementById('edit_sched_notes').value = sched.notes || '';
+        const m = document.getElementById('modalEditJadwal');
+        if (m) m.style.display = 'block';
+    }
+
+    function closeEditJadwalModal() {
+        const m = document.getElementById('modalEditJadwal');
+        if (m) m.style.display = 'none';
+    }
+
     function openAddMemberModal(scheduleId, label) {
         document.getElementById('labelScheduleTarget').innerText = 'Menambahkan ke: ' + label;
         document.getElementById('formTambahAnggota').action = '/ronda/jadwal/' + scheduleId + '/anggota';
-        document.getElementById('modalTambahAnggota').style.display = 'block';
+        const m = document.getElementById('modalTambahAnggota');
+        if (m) m.style.display = 'block';
     }
+
+    function closeTambahAnggotaModal() {
+        const m = document.getElementById('modalTambahAnggota');
+        if (m) m.style.display = 'none';
+    }
+
+    // Backdrop click listener to close whichever modal is clicked outside
+    window.addEventListener('click', function(e) {
+        const modals = ['modalTambahJadwal', 'modalEditJadwal', 'modalTambahAnggota'];
+        modals.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && e.target === el) {
+                el.style.display = 'none';
+            }
+        });
+    });
 </script>
 @endsection
