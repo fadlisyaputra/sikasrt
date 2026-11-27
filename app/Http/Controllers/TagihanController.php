@@ -112,7 +112,16 @@ class TagihanController extends Controller
                 ->first();
 
             if (!$existing) {
-                $billCode = 'INV-' . $request->period_year . sprintf('%02d', $request->period_month) . '-' . sprintf('%04d', $warga->id);
+                $baseCode = 'INV-' . $request->period_year . sprintf('%02d', $request->period_month) . '-T' . $iuranType->id . '-' . sprintf('%04d', $warga->id);
+                $billCode = $baseCode;
+                $counter = 1;
+                while (WargaBill::where('bill_code', $billCode)->exists()) {
+                    $billCode = $baseCode . '-' . $counter;
+                    $counter++;
+                }
+
+                $monthObj = \DateTime::createFromFormat('!m', (int)$request->period_month);
+                $monthName = $monthObj ? $monthObj->format('F') : (string)$request->period_month;
 
                 WargaBill::create([
                     'bill_code' => $billCode,
@@ -123,14 +132,16 @@ class TagihanController extends Controller
                     'amount' => $iuranType->amount,
                     'due_date' => $request->due_date,
                     'status' => 'unpaid',
-                    'notes' => 'Tagihan ' . $iuranType->name . ' - Periode ' . Carbon::create()->month($request->period_month)->translatedFormat('F') . ' ' . $request->period_year,
+                    'notes' => 'Tagihan ' . $iuranType->name . ' - Periode ' . $monthName . ' ' . $request->period_year,
                     'created_by' => Auth::id(),
                 ]);
                 $generatedCount++;
             }
         }
 
-        return redirect()->back()->with('success', "Berhasil men-generate $generatedCount tagihan warga baru untuk bulan " . Carbon::create()->month($request->period_month)->translatedFormat('F') . " $request->period_year.");
+        $monthObj = \DateTime::createFromFormat('!m', (int)$request->period_month);
+        $monthName = $monthObj ? $monthObj->format('F') : (string)$request->period_month;
+        return redirect()->back()->with('success', "Berhasil men-generate $generatedCount tagihan warga baru untuk bulan $monthName $request->period_year.");
     }
 
     /**
@@ -148,7 +159,13 @@ class TagihanController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        $billCode = 'INV-' . $request->period_year . sprintf('%02d', $request->period_month) . '-' . sprintf('%04d', $request->user_id) . '-' . rand(10, 99);
+        $baseCode = 'INV-' . $request->period_year . sprintf('%02d', $request->period_month) . '-T' . $request->iuran_type_id . '-' . sprintf('%04d', $request->user_id);
+        $billCode = $baseCode;
+        $counter = 1;
+        while (WargaBill::where('bill_code', $billCode)->exists()) {
+            $billCode = $baseCode . '-' . $counter;
+            $counter++;
+        }
 
         WargaBill::create([
             'bill_code' => $billCode,

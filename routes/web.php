@@ -107,8 +107,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tagihan/invoice/{id}', [TagihanController::class, 'invoice'])->name('tagihan.invoice');
     Route::post('/tagihan/bayar/{id}', [TagihanController::class, 'payBill'])->name('tagihan.pay');
     Route::middleware(['role:superadmin,bendahara,rt'])->group(function () {
-        Route::post('/tagihan/generate', [TagihanController::class, 'generate'])->name('tagihan.generate');
-        Route::post('/tagihan/tambah', [TagihanController::class, 'store'])->name('tagihan.store');
+        Route::match(['get', 'post'], '/tagihan/generate', function (\Illuminate\Http\Request $request) {
+            if ($request->isMethod('get')) {
+                return redirect()->route('tagihan.index');
+            }
+            return app(\App\Http\Controllers\TagihanController::class)->generate($request);
+        })->name('tagihan.generate');
+        Route::match(['get', 'post'], '/tagihan/tambah', function (\Illuminate\Http\Request $request) {
+            if ($request->isMethod('get')) {
+                return redirect()->route('tagihan.index');
+            }
+            return app(\App\Http\Controllers\TagihanController::class)->store($request);
+        })->name('tagihan.store');
         Route::post('/tagihan/lunas/{id}', [TagihanController::class, 'markPaid'])->name('tagihan.mark_paid');
         Route::delete('/tagihan/{id}', [TagihanController::class, 'destroy'])->name('tagihan.destroy');
     });

@@ -108,10 +108,10 @@
 
             @if(in_array(auth()->user()->role, ['superadmin', 'bendahara', 'rt']))
             <div style="display: flex; gap: 8px; flex-wrap: wrap; width: 100%; max-width: 480px; justify-content: flex-end;">
-                <button type="button" onclick="document.getElementById('modalGenerate').style.display='block'" class="btn btn-primary" style="font-size: 12px; font-weight: 700; flex: 1 1 auto; justify-content: center;">
+                <button type="button" onclick="openGenerateModal()" class="btn btn-primary" style="font-size: 12px; font-weight: 700; flex: 1 1 auto; justify-content: center;">
                     <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Tagihan
                 </button>
-                <button type="button" onclick="document.getElementById('modalTambahTagihan').style.display='block'" class="btn btn-secondary" style="font-size: 12px; flex: 1 1 auto; justify-content: center;">
+                <button type="button" onclick="openTambahTagihanModal()" class="btn btn-secondary" style="font-size: 12px; flex: 1 1 auto; justify-content: center;">
                     <i class="fa-solid fa-plus"></i> Tambah Tagihan
                 </button>
             </div>
@@ -300,11 +300,16 @@
 </div>
 
 <!-- Modal Generate Tagihan Massal Bulanan (Bendahara / RT) -->
-<div id="modalGenerate" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 999; padding: 20px; overflow-y: auto;">
+<div id="modalGenerate" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 99999; padding: 20px; overflow-y: auto;">
     <div style="max-width: 480px; margin: 60px auto; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); padding: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 style="font-size: 18px; font-weight: 800; color: #fff;">Generate Tagihan Bulanan</h3>
-            <button type="button" onclick="document.getElementById('modalGenerate').style.display='none'" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                </div>
+                <h3 style="font-size: 17px; font-weight: 800; color: #fff; margin: 0;">Generate Tagihan Bulanan</h3>
+            </div>
+            <button type="button" onclick="closeGenerateModal()" style="background: none; border: none; color: #fff; font-size: 22px; cursor: pointer;">&times;</button>
         </div>
         <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
             Sistem akan secara otomatis menerbitkan tagihan iuran resmi kepada seluruh warga terdaftar yang belum memiliki tagihan pada periode ini.
@@ -341,19 +346,98 @@
                 <input type="date" name="due_date" class="form-control" value="{{ date('Y-m-t') }}" required>
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
-                <button type="button" onclick="document.getElementById('modalGenerate').style.display='none'" class="btn btn-secondary">Batal</button>
-                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-wand-magic-sparkles"></i> Terbitkan Sekarang</button>
+                <button type="button" onclick="closeGenerateModal()" class="btn btn-secondary">Batal</button>
+                <button type="submit" class="btn btn-primary" style="font-weight: 700;"><i class="fa-solid fa-wand-magic-sparkles"></i> Terbitkan Sekarang</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Tambah Tagihan Manual untuk 1 Warga (Bendahara / RT) -->
+<div id="modalTambahTagihan" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 99999; padding: 20px; overflow-y: auto;">
+    <div style="max-width: 500px; margin: 60px auto; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); padding: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+                    <i class="fa-solid fa-plus"></i>
+                </div>
+                <h3 style="font-size: 17px; font-weight: 800; color: #fff; margin: 0;">Tambah Tagihan Manual</h3>
+            </div>
+            <button type="button" onclick="closeTambahTagihanModal()" style="background: none; border: none; color: #fff; font-size: 22px; cursor: pointer;">&times;</button>
+        </div>
+        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 16px;">
+            Terbitkan tagihan baru secara spesifik untuk satu warga tertentu.
+        </p>
+
+        <form action="{{ route('tagihan.store') }}" method="POST">
+            @csrf
+            <div class="form-group">
+                <label>Pilih Warga</label>
+                <select name="user_id" class="form-control" required>
+                    <option value="">-- Pilih Warga Penerima Tagihan --</option>
+                    @foreach($wargaList as $w)
+                    <option value="{{ $w->id }}">{{ $w->name }} ({{ $w->address ?? 'RT 01' }})</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Jenis Iuran</label>
+                <select name="iuran_type_id" id="tambah_iuran_type_id" class="form-control" onchange="syncTambahAmount(this)" required>
+                    <option value="">-- Pilih Jenis Iuran --</option>
+                    @foreach($iuranTypes as $type)
+                    <option value="{{ $type->id }}" data-amount="{{ (int)$type->amount }}">{{ $type->name }} - Rp {{ number_format($type->amount, 0, ',', '.') }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="grid grid-2" style="gap: 12px;">
+                <div class="form-group">
+                    <label>Bulan Periode</label>
+                    <select name="period_month" class="form-control" required>
+                        @for($m = 1; $m <= 12; $m++)
+                            <option value="{{ $m }}" {{ date('n') == $m ? 'selected' : '' }}>
+                                {{ DateTime::createFromFormat('!m', $m)->format('F') }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tahun</label>
+                    <input type="number" name="period_year" class="form-control" value="{{ date('Y') }}" required>
+                </div>
+            </div>
+
+            <div class="grid grid-2" style="gap: 12px;">
+                <div class="form-group">
+                    <label>Nominal Tagihan (Rp)</label>
+                    <input type="number" name="amount" id="tambah_amount" class="form-control" placeholder="50000" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Batas Jatuh Tempo</label>
+                    <input type="date" name="due_date" class="form-control" value="{{ date('Y-m-t') }}" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Catatan Tambahan (Opsional)</label>
+                <input type="text" name="notes" class="form-control" placeholder="Contoh: Tagihan susulan atau iuran khusus">
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+                <button type="button" onclick="closeTambahTagihanModal()" class="btn btn-secondary">Batal</button>
+                <button type="submit" class="btn btn-primary" style="font-weight: 700;"><i class="fa-solid fa-save"></i> Terbitkan Tagihan</button>
             </div>
         </form>
     </div>
 </div>
 
 <!-- Modal Tandai Lunas (Bendahara / RT) -->
-<div id="modalMarkPaid" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 999; padding: 20px;">
+<div id="modalMarkPaid" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 99999; padding: 20px;">
     <div style="max-width: 440px; margin: 80px auto; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); padding: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <h3 style="font-size: 16px; font-weight: 800; color: #fff;">Konfirmasi Pelunasan Tagihan</h3>
-            <button type="button" onclick="document.getElementById('modalMarkPaid').style.display='none'" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+            <button type="button" onclick="closeMarkPaidModal()" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
         </div>
 
         <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; border-radius: 10px; padding: 12px; margin-bottom: 16px;">
@@ -377,7 +461,7 @@
                 <input type="text" name="notes" class="form-control" placeholder="Contoh: Diterima langsung oleh Bendahara">
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
-                <button type="button" onclick="document.getElementById('modalMarkPaid').style.display='none'" class="btn btn-secondary">Batal</button>
+                <button type="button" onclick="closeMarkPaidModal()" class="btn btn-secondary">Batal</button>
                 <button type="submit" class="btn btn-success"><i class="fa-solid fa-check"></i> Simpan & Tandai Lunas</button>
             </div>
         </form>
@@ -385,11 +469,11 @@
 </div>
 
 <!-- Modal Bayar Tagihan (Warga) -->
-<div id="modalBayarTagihan" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); z-index: 999; padding: 20px; overflow-y: auto;">
+<div id="modalBayarTagihan" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 99999; padding: 20px; overflow-y: auto;">
     <div style="max-width: 480px; margin: 60px auto; background: var(--bg-card); border-radius: 16px; border: 1px solid var(--border-color); padding: 24px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <h3 style="font-size: 18px; font-weight: 800; color: #fff;">Pembayaran Tagihan Iuran</h3>
-            <button type="button" onclick="document.getElementById('modalBayarTagihan').style.display='none'" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
+            <button type="button" onclick="closeBayarModal()" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">&times;</button>
         </div>
 
         <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; margin-bottom: 16px;">
@@ -416,7 +500,7 @@
                 <textarea name="notes" class="form-control" rows="2" placeholder="Nama bank pengirim, tanggal transfer..."></textarea>
             </div>
             <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
-                <button type="button" onclick="document.getElementById('modalBayarTagihan').style.display='none'" class="btn btn-secondary">Batal</button>
+                <button type="button" onclick="closeBayarModal()" class="btn btn-secondary">Batal</button>
                 <button type="submit" class="btn btn-success"><i class="fa-solid fa-cloud-arrow-up"></i> Kirim Pembayaran</button>
             </div>
         </form>
@@ -424,12 +508,46 @@
 </div>
 
 <script>
+    function openGenerateModal() {
+        const m = document.getElementById('modalGenerate');
+        if (m) m.style.display = 'block';
+    }
+
+    function closeGenerateModal() {
+        const m = document.getElementById('modalGenerate');
+        if (m) m.style.display = 'none';
+    }
+
+    function openTambahTagihanModal() {
+        const m = document.getElementById('modalTambahTagihan');
+        if (m) m.style.display = 'block';
+    }
+
+    function closeTambahTagihanModal() {
+        const m = document.getElementById('modalTambahTagihan');
+        if (m) m.style.display = 'none';
+    }
+
+    function syncTambahAmount(selectEl) {
+        const selected = selectEl.options[selectEl.selectedIndex];
+        const amount = selected.getAttribute('data-amount');
+        if (amount) {
+            document.getElementById('tambah_amount').value = amount;
+        }
+    }
+
     function openMarkPaidModal(billId, code, wargaName, amount) {
         document.getElementById('mpInvoiceCode').innerText = 'No: ' + code;
         document.getElementById('mpWargaName').innerText = wargaName;
         document.getElementById('mpAmount').innerText = 'Rp ' + Number(amount).toLocaleString('id-ID');
         document.getElementById('formMarkPaid').action = '/tagihan/lunas/' + billId;
-        document.getElementById('modalMarkPaid').style.display = 'block';
+        const m = document.getElementById('modalMarkPaid');
+        if (m) m.style.display = 'block';
+    }
+
+    function closeMarkPaidModal() {
+        const m = document.getElementById('modalMarkPaid');
+        if (m) m.style.display = 'none';
     }
 
     function openBayarModal(billId, code, iuranName, amount) {
@@ -437,7 +555,24 @@
         document.getElementById('byIuranName').innerText = iuranName;
         document.getElementById('byAmount').innerText = 'Total: Rp ' + Number(amount).toLocaleString('id-ID');
         document.getElementById('formBayarTagihan').action = '/tagihan/bayar/' + billId;
-        document.getElementById('modalBayarTagihan').style.display = 'block';
+        const m = document.getElementById('modalBayarTagihan');
+        if (m) m.style.display = 'block';
     }
+
+    function closeBayarModal() {
+        const m = document.getElementById('modalBayarTagihan');
+        if (m) m.style.display = 'none';
+    }
+
+    // Backdrop click listener to close whichever modal is clicked outside
+    window.addEventListener('click', function(e) {
+        const modals = ['modalGenerate', 'modalTambahTagihan', 'modalMarkPaid', 'modalBayarTagihan'];
+        modals.forEach(id => {
+            const el = document.getElementById(id);
+            if (el && e.target === el) {
+                el.style.display = 'none';
+            }
+        });
+    });
 </script>
 @endsection
