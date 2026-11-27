@@ -119,6 +119,46 @@ class Esp32Controller extends Controller
         // =========================================================================
         // 0. CEK MODE PAIRING / REGISTRASI e-KTP VIA ESP32 READER
         // =========================================================================
+        // A. Cek Sesi Rekam e-KTP dari Halaman Manajemen Warga (Registrasi / Tambah Warga Baru)
+        $wargaScanSession = Cache::get('warga_scan_session');
+        if ($wargaScanSession) {
+            $existingUser = User::where(function($q) use ($uid, $cleanHex) {
+                $q->where('rfid_uid', $uid)
+                  ->orWhereRaw("REPLACE(REPLACE(rfid_uid, ':', ''), '-', '') = ?", [$cleanHex]);
+            })->first();
+
+            Cache::put('warga_scan_result', [
+                'status' => 'success',
+                'uid' => $uid,
+                'is_existing' => (bool)$existingUser,
+                'existing_user_name' => $existingUser ? $existingUser->name : null,
+                'existing_user_address' => $existingUser ? $existingUser->address : null,
+                'scanned_at' => $now->toIso8601String(),
+            ], 60);
+
+            Cache::forget('warga_scan_session');
+
+            $msg = $existingUser 
+                ? 'e-KTP TERBACA (SUDAH TERDAFTAR MILIK ' . strtoupper($existingUser->name) . ')'
+                : 'e-KTP BARU BERHASIL DIREKAM: ' . $uid;
+
+            return response()->json([
+                'authorized' => true,
+                'status' => 'scanned',
+                'uid' => $uid,
+                'is_existing' => (bool)$existingUser,
+                'existing_user' => $existingUser ? $existingUser->name : null,
+                'message' => $msg,
+                'action' => 'buzzer_success',
+                'display' => [
+                    'line1' => 'REKAM e-KTP OK',
+                    'line2' => substr($uid, 0, 16),
+                    'line3' => $existingUser ? 'SUDAH TERDAFTAR' : 'SIAP DAFTARKAN',
+                ],
+            ], 200);
+        }
+
+        // B. Cek Sesi Pairing Akun Warga Mandiri (ktp_pairing_session)
         $pairingSession = Cache::get('ktp_pairing_session');
         if ($pairingSession && isset($pairingSession['user_id'])) {
             $targetUser = User::find($pairingSession['user_id']);

@@ -50,10 +50,17 @@ Route::middleware(['auth'])->group(function () {
     // Warga / User Directory Management Routes
     Route::middleware(['role:superadmin,bendahara,rt'])->group(function () {
         Route::get('/warga', [WargaController::class, 'index'])->name('warga.index');
+        Route::post('/warga/scan-session/start', [WargaController::class, 'startScanSession'])->name('warga.scan.start');
+        Route::get('/warga/scan-session/check', [WargaController::class, 'checkScanSession'])->name('warga.scan.check');
+        Route::post('/warga/scan-session/cancel', [WargaController::class, 'cancelScanSession'])->name('warga.scan.cancel');
+        Route::post('/warga/check-uid', [WargaController::class, 'checkUidAvailability'])->name('warga.check.uid');
+        Route::post('/warga/simulate-scan', [WargaController::class, 'simulateScan'])->name('warga.simulate.scan');
     });
     Route::middleware(['role:superadmin,bendahara'])->group(function () {
         Route::post('/warga/tambah', [WargaController::class, 'store'])->name('warga.store');
         Route::put('/warga/{id}/update', [WargaController::class, 'update'])->name('warga.update');
+        Route::post('/warga/{id}/pair-ktp', [WargaController::class, 'pairKtpDirect'])->name('warga.pair.ktp');
+        Route::post('/warga/{id}/unpair-ktp', [WargaController::class, 'unpairKtpDirect'])->name('warga.unpair.ktp');
     });
     Route::middleware(['role:superadmin'])->group(function () {
         Route::delete('/warga/{id}/delete', [WargaController::class, 'destroy'])->name('warga.destroy');
