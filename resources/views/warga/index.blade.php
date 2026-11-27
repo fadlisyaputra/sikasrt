@@ -12,7 +12,7 @@
     </div>
 
     @if(in_array(auth()->user()->role, ['superadmin', 'bendahara']))
-    <button onclick="document.getElementById('modal-tambah-user').style.display='flex';" class="btn btn-primary">
+    <button type="button" onclick="openTambahWargaModal()" class="btn btn-primary" id="btnTambahWarga">
         <i class="fa-solid fa-user-plus"></i> Tambah Akun / Warga Baru
     </button>
     @endif
@@ -148,10 +148,6 @@
                     <span class="badge {{ $u->status_warga === 'tetap' ? 'badge-success' : 'badge-pending' }}" style="font-size: 9.5px; padding: 2px 7px;">
                         {{ strtoupper($u->status_warga) }}
                     </span>
-                <div style="text-align: right;">
-                    <span class="badge {{ $u->status_warga === 'tetap' ? 'badge-success' : 'badge-pending' }}" style="font-size: 9.5px; padding: 2px 7px;">
-                        {{ strtoupper($u->status_warga) }}
-                    </span>
                     @if($u->rfid_uid)
                     <div style="margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px;">
                         <span style="font-family: monospace; font-size: 10px; color: #38bdf8; background: rgba(6,182,212,0.15); padding: 2px 6px; border-radius: 4px;">
@@ -203,14 +199,14 @@
 
 <!-- Modal Tambah Akun / Warga Baru dengan Fitur Rekam e-KTP -->
 @if(in_array(auth()->user()->role, ['superadmin', 'bendahara']))
-<div id="modal-tambah-user" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 1000; align-items:center; justify-content:center; padding: 16px; overflow-y: auto;">
+<div id="modal-tambah-user" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 99999; align-items:center; justify-content:center; padding: 16px; overflow-y: auto;">
     <div class="card" style="width: 100%; max-width: 580px; margin: auto; max-height: 92vh; overflow-y: auto;">
         <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
             <div class="card-title">
                 <i class="fa-solid fa-user-plus" style="color: var(--primary);"></i>
                 <span>Tambah Akun / Registrasi Warga Baru</span>
             </div>
-            <button onclick="document.getElementById('modal-tambah-user').style.display='none'; cancelScanEsp32();" class="btn btn-secondary" style="padding: 4px 8px; font-size: 16px;">&times;</button>
+            <button type="button" onclick="closeTambahWargaModal()" class="btn btn-secondary" style="padding: 4px 8px; font-size: 16px;">&times;</button>
         </div>
 
         <form action="{{ route('warga.store') }}" method="POST" style="margin-top: 14px;">
@@ -326,7 +322,7 @@
             </div>
 
             <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                <button type="button" onclick="document.getElementById('modal-tambah-user').style.display='none'; cancelScanEsp32();" class="btn btn-secondary">Batal</button>
+                <button type="button" onclick="closeTambahWargaModal()" class="btn btn-secondary">Batal</button>
                 <button type="submit" class="btn btn-primary" style="font-weight: 700;">
                     <i class="fa-solid fa-check"></i> Simpan Data Warga
                 </button>
@@ -336,7 +332,7 @@
 </div>
 
 <!-- Modal Rekam / Pasangkan e-KTP Langsung untuk Warga Terdaftar -->
-<div id="modal-direct-pair" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(6px); z-index: 1000; align-items:center; justify-content:center; padding: 16px;">
+<div id="modal-direct-pair" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 99999; align-items:center; justify-content:center; padding: 16px;">
     <div class="card" style="width: 100%; max-width: 480px; margin: auto;">
         <div class="card-header" style="border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
             <div class="card-title">
@@ -676,6 +672,35 @@
         cancelScanEsp32();
         currentDirectPairUserId = null;
     }
+    // 5. MODAL TAMBAH WARGA
+    function openTambahWargaModal() {
+        const modal = document.getElementById('modal-tambah-user');
+        if (modal) {
+            modal.style.display = 'flex';
+            const input = modal.querySelector('input[name="name"]');
+            if (input) input.focus();
+        }
+    }
+
+    function closeTambahWargaModal() {
+        const modal = document.getElementById('modal-tambah-user');
+        if (modal) {
+            modal.style.display = 'none';
+            cancelScanEsp32();
+        }
+    }
+
+    // Tutup modal jika user klik di luar card (backdrop click)
+    window.addEventListener('click', function(e) {
+        const modalTambah = document.getElementById('modal-tambah-user');
+        if (modalTambah && e.target === modalTambah) {
+            closeTambahWargaModal();
+        }
+        const modalPair = document.getElementById('modal-direct-pair');
+        if (modalPair && e.target === modalPair) {
+            closeDirectPairModal();
+        }
+    });
 </script>
 @endpush
 @endsection
